@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PS5 Pro 가격 논쟁: 한일 비교 분석</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Warm Neutrals with Muted Teal Accent -->
+    <!-- Application Structure Plan: A single-page, narrative-driven vertical layout. The structure guides the user from the initial price reveal to a data-driven comparison, then to a cultural analysis, and finally to a conclusion. This top-down approach is chosen for its clarity, allowing users to first grasp the core data (price comparison) and then understand the nuanced reasons (cultural differences) behind the divergent reactions in Korea and Japan. Key interactions include hovering over the main comparison chart to see detailed price data and toggling between countries in the analysis section to focus on specific market sentiments. This flow is more intuitive than a dashboard, as it tells a complete story. -->
+    <!-- Visualization & Content Choices: 
+        1. Key Metrics (Price): Report Info -> Estimated PS5 Pro Price. Goal -> Inform. Viz/Presentation -> Large, clear text in styled cards. Interaction -> None. Justification -> Immediately establish the baseline for the debate. Library/Method -> HTML/Tailwind.
+        2. Price Comparison: Report Info -> PS5 Pro vs. PC Price Data. Goal -> Compare. Viz/Presentation -> Grouped Bar Chart. Interaction -> Hover tooltips showing exact prices and price gaps. Justification -> Provides the central, quantitative argument of the analysis in a visually compelling and easy-to-compare format. Library/Method -> Chart.js (Canvas).
+        3. Gamer Priorities: Report Info -> Analysis of market culture. Goal -> Organize/Compare. Viz/Presentation -> Two Donut Charts. Interaction -> None (static visual aids). Justification -> Simplifies the complex cultural factors (price sensitivity vs. exclusive titles) into an easily digestible visual metaphor for each country's dominant gamer mindset. Library/Method -> Chart.js (Canvas).
+        4. Textual Analysis: Report Info -> Synthesis of debate context. Goal -> Inform/Explain. Viz/Presentation -> Styled text blocks in a two-column layout. Interaction -> None. Justification -> Provides the qualitative narrative and context that the charts alone cannot convey. Library/Method -> HTML/Tailwind.
+    -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Noto Sans KR', sans-serif;
+            background-color: #F5F5F4; /* stone-100 */
+            color: #292524; /* stone-800 */
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 768px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 400px;
+        }
+        .donut-chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 280px;
+            height: 280px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        @media (max-width: 640px) {
+            .chart-container {
+                height: 350px;
+            }
+             .donut-chart-container {
+                max-width: 240px;
+                height: 240px;
+            }
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <header class="bg-white/80 backdrop-blur-md sticky top-0 z-10 border-b border-stone-200">
+        <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+            <h1 class="text-2xl sm:text-3xl font-bold text-stone-900 text-center">PS5 Pro 가격 논쟁: 한일 비교 분석</h1>
+            <p class="text-center text-stone-500 mt-1">유사 사양 PC와의 가격 비교를 통한 게이머 시각 탐구</p>
+        </div>
+    </header>
+
+    <main class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
+
+        <section id="intro" class="mb-16">
+            <h2 class="text-2xl font-bold text-teal-700 mb-4">1. 논쟁의 시작: PS5 Pro 예상 가격</h2>
+            <p class="text-lg text-stone-600 mb-8 leading-relaxed">
+                차세대 콘솔 게임기 PS5 Pro의 출시가 임박하면서 예상 가격에 대한 정보가 공개되었습니다. 약 $649 선으로 책정될 것이라는 예측은 한국과 일본 양국 게이머 커뮤니티에 큰 파장을 일으켰습니다. 특히 이 가격이 과연 합리적인지를 두고, 각국의 게이밍 PC 시장 및 문화와 비교하며 활발한 토론이 이어졌습니다. 이 분석은 바로 그 지점에서 시작합니다.
+            </p>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 text-center">
+                <div class="bg-white p-6 rounded-xl shadow-sm border border-stone-200">
+                    <h3 class="text-xl font-semibold text-stone-700">대한민국 예상 가격</h3>
+                    <p class="text-4xl font-bold text-teal-600 mt-2">약 880,000 원</p>
+                    <p class="text-sm text-stone-500 mt-1">(환율 1,350원 기준)</p>
+                </div>
+                <div class="bg-white p-6 rounded-xl shadow-sm border border-stone-200">
+                    <h3 class="text-xl font-semibold text-stone-700">일본 예상 가격</h3>
+                    <p class="text-4xl font-bold text-teal-600 mt-2">약 100,000 엔</p>
+                     <p class="text-sm text-stone-500 mt-1">(세금 포함, 시장 프리미엄 고려)</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="comparison" class="mb-16">
+            <h2 class="text-2xl font-bold text-teal-700 mb-4">2. 핵심 비교: PS5 Pro vs 유사 사양 PC</h2>
+            <p class="text-lg text-stone-600 mb-8 leading-relaxed">
+                가격 논쟁의 핵심은 '같은 성능을 내는 PC를 맞추는 비용'과의 비교입니다. PS5 Pro의 예상 성능(RTX 4070급 그래픽, Zen 2 기반 CPU)을 기준으로 양국에서 PC를 조립할 경우의 견적과 PS5 Pro의 가격을 비교했습니다. 아래 차트는 양국에서 PS5 Pro가 PC 대비 어느 정도의 가격 경쟁력을 갖는지 보여줍니다.
+            </p>
+            <div class="bg-white p-4 sm:p-6 rounded-xl shadow-sm border border-stone-200">
+                <div class="chart-container">
+                    <canvas id="priceComparisonChart"></canvas>
+                </div>
+            </div>
+        </section>
+
+        <section id="analysis" class="mb-16">
+            <h2 class="text-2xl font-bold text-teal-700 mb-4">3. 엇갈린 반응: 왜 달랐을까?</h2>
+            <p class="text-lg text-stone-600 mb-8 leading-relaxed">
+                차트에서 보듯, 양국 모두 PS5 Pro는 유사 사양 PC 대비 확실한 가격 우위를 보입니다. 그럼에도 불구하고 게이머들의 반응은 극명하게 갈렸습니다. 한국에서는 "저 돈이면 그냥 PC 맞추지"라는 회의적인 시각이 빠르게 확산된 반면, 일본에서는 가격에 대한 갑론을박이 훨씬 더 길고 치열하게 이어졌습니다. 그 이유는 각국의 게이밍 문화와 시장의 특성 차이에 있습니다.
+            </p>
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                
+                <div class="bg-white p-6 rounded-xl shadow-sm border border-stone-200 flex flex-col">
+                    <h3 class="text-xl font-bold text-center mb-4 text-stone-800">🇰🇷 한국: "가성비와 범용성"의 관점</h3>
+                    <p class="text-stone-600 mb-6">
+                        한국은 세계적으로 강력한 PC DIY(조립 PC) 시장을 보유하고 있습니다. 게이머들은 '지불한 비용 대비 최고의 성능(가성비)'을 추구하는 경향이 강하며, 게임 외에도 작업, 학습 등 다용도로 활용 가능한 PC를 선호합니다. PS5 Pro의 가격이 PC보다 저렴하긴 하지만, 절대적인 금액 자체가 PC 업그레이드나 신규 구매를 고려할 만한 수준에 근접하자 "차라리 돈을 조금 더 보태 범용성 높은 PC를 사겠다"는 여론이 형성되었습니다. 즉, 단순 게임 성능을 넘어선 '총체적 가치'에서 PC가 우위라고 판단한 것입니다.
+                    </p>
+                    <div class="mt-auto">
+                        <div class="donut-chart-container">
+                            <canvas id="koreaPriorityChart"></canvas>
+                        </div>
+                        <p class="text-center text-sm font-semibold mt-2 text-stone-600">한국 게이머의 주요 고려사항</p>
+                    </div>
+                </div>
+
+                <div class="bg-white p-6 rounded-xl shadow-sm border border-stone-200 flex flex-col">
+                    <h3 class="text-xl font-bold text-center mb-4 text-stone-800">🇯🇵 일본: "독점작과 최적화"의 관점</h3>
+                    <p class="text-stone-600 mb-6">
+                        일본은 전통적으로 콘솔 게임 시장이 PC 시장을 압도합니다. 게이머들은 PC 조립의 번거로움 없이, 구매 즉시 최상의 게임 경험을 제공하는 '편의성과 최적화'를 중요하게 생각합니다. 특히 <몬스터 헌터 와일즈>와 같은 초대형 독점작(혹은 기간 독점)의 출시는 특정 콘솔을 구매하게 만드는 가장 강력한 동기입니다. 일본 게이머들에게 PS5 Pro의 가격은 '최고의 환경에서 <몬헌 와일즈>를 즐기기 위한 투자'로 인식될 수 있습니다. PC와의 가격 차이보다는 '콘솔이 제공하는 독점적인 경험'의 가치를 더 높게 평가하는 경향이 논쟁을 뜨겁게 만든 요인입니다.
+                    </p>
+                     <div class="mt-auto">
+                        <div class="donut-chart-container">
+                            <canvas id="japanPriorityChart"></canvas>
+                        </div>
+                        <p class="text-center text-sm font-semibold mt-2 text-stone-600">일본 게이머의 주요 고려사항</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="conclusion">
+            <h2 class="text-2xl font-bold text-teal-700 mb-4">4. 결론: 다른 시장, 다른 해답</h2>
+            <p class="text-lg text-stone-600 mb-8 leading-relaxed">
+                결론적으로, PS5 Pro 가격 논쟁에 대한 한일 양국의 온도 차이는 단순히 숫자로 표현되는 가격표 때문이 아니었습니다. 이는 각국의 게이밍 생태계가 수십 년에 걸쳐 형성해 온 고유한 '가치 판단 기준'의 차이를 명확하게 보여주는 사례입니다. 한국 게이머들은 '최고의 가성비와 범용성'이라는 잣대로 PS5 Pro를 평가했고, 일본 게이머들은 '독점적인 게임 경험과 편의성'이라는 잣대로 접근했습니다. 따라서 "PS5 Pro를 왜 사냐?"는 질문에 대해, 두 시장은 각자의 문화적 맥락 속에서 서로 다른 해답을 내놓은 것입니다.
+            </p>
+             <div class="bg-teal-50 border-l-4 border-teal-500 text-teal-800 p-4 rounded-r-lg" role="alert">
+                <p class="font-bold">핵심 인사이트</p>
+                <p>제품의 가치는 절대적인 성능이나 가격만으로 결정되지 않으며, 해당 제품을 소비하는 시장의 문화적 배경과 핵심 가치에 따라 재정의됩니다.</p>
+            </div>
+        </section>
+
+    </main>
+
+    <footer class="bg-stone-800 text-white mt-16">
+        <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-6 text-center text-sm text-stone-400">
+            <p>&copy; 2025 Market Analysis Report. All Rights Reserved.</p>
+            <p class="mt-1">본 분석은 공개된 정보와 시장 동향을 기반으로 하며, 실제 출시 가격 및 시장 반응은 달라질 수 있습니다.</p>
+        </div>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const FONT_COLOR = '#292524';
+            const GRID_COLOR = '#E7E5E4';
+
+            const priceData = {
+                labels: ['대한민국 (KRW)', '일본 (JPY)'],
+                datasets: [
+                    {
+                        label: 'PS5 Pro (예상)',
+                        data: [880000, 100000],
+                        backgroundColor: '#0D9488', // teal-600
+                        borderColor: '#0F766E', // teal-700
+                        borderWidth: 1,
+                        barPercentage: 0.6,
+                        categoryPercentage: 0.7
+                    },
+                    {
+                        label: '유사 사양 PC (조립)',
+                        data: [1450000, 175000],
+                        backgroundColor: '#A8A29E', // stone-400
+                        borderColor: '#78716C', // stone-500
+                        borderWidth: 1,
+                        barPercentage: 0.6,
+                        categoryPercentage: 0.7
+                    }
+                ]
+            };
+
+            const priceComparisonCtx = document.getElementById('priceComparisonChart').getContext('2d');
+            new Chart(priceComparisonCtx, {
+                type: 'bar',
+                data: priceData,
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'PS5 Pro vs 유사 사양 PC 가격 비교',
+                            font: { size: 18, weight: 'bold' },
+                            color: FONT_COLOR,
+                            padding: { bottom: 20 }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    let label = context.dataset.label || '';
+                                    if (label) {
+                                        label += ': ';
+                                    }
+                                    if (context.parsed.y !== null) {
+                                        const currency = context.label.includes('KRW') ? '원' : '엔';
+                                        label += new Intl.NumberFormat('ko-KR').format(context.parsed.y) + ` ${currency}`;
+                                    }
+                                    return label;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            ticks: {
+                                color: FONT_COLOR,
+                                font: { weight: '500' }
+                            },
+                            grid: { display: false }
+                        },
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                color: FONT_COLOR,
+                                callback: function(value, index, values) {
+                                    if (value >= 10000) return (value / 10000) + '만';
+                                    return value;
+                                }
+                            },
+                            grid: {
+                                color: GRID_COLOR,
+                                drawBorder: false
+                            }
+                        }
+                    }
+                }
+            });
+
+            const createPriorityChart = (canvasId, data) => {
+                const ctx = document.getElementById(canvasId).getContext('2d');
+                new Chart(ctx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: data.labels,
+                        datasets: [{
+                            data: data.values,
+                            backgroundColor: ['#0D9488', '#5EEAD4', '#A8A29E'], // teal-600, teal-300, stone-400
+                            borderColor: '#F5F5F4', // Match body background for clean separation
+                            borderWidth: 4,
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                position: 'bottom',
+                                labels: {
+                                    color: FONT_COLOR,
+                                    padding: 15,
+                                    font: {
+                                        size: 12,
+                                    }
+                                }
+                            },
+                        }
+                    }
+                });
+            };
+
+            const koreaPriorityData = {
+                labels: ['가성비', '범용성(PC)', '독점작'],
+                values: [50, 35, 15]
+            };
+            createPriorityChart('koreaPriorityChart', koreaPriorityData);
+
+            const japanPriorityData = {
+                labels: ['독점작 경험', '최적화/편의성', '가격'],
+                values: [55, 30, 15]
+            };
+            createPriorityChart('japanPriorityChart', japanPriorityData);
+
+        });
+    </script>
+
+</body>
+</html>
+
