@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>궁극의 꽃게 요리 비법서</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Warm Crab Boil -->
+    <!-- Application Structure Plan: A two-section single-page application. Section 1 provides a step-by-step guide to steaming crabs. Section 2 focuses on crab ramen, featuring an interactive radar chart for comparing ramen brands and a detailed recipe for the user's specified choice (Ansungtangmyun). This task-oriented structure directly answers the user's two main questions, making navigation intuitive. The interactive chart provides a data-driven experience to justify the ramen selection, enhancing user engagement and trust. -->
+    <!-- Visualization & Content Choices: 1. Steamed Crab Guide: Report Info -> How to steam crab. Goal -> Inform/Instruct. Viz/Method -> Numbered HTML cards with icons. Interaction -> None needed, focus is on clarity. Justification -> Simple, clear visual steps are best for a recipe. 2. Ramen Comparison: Report Info -> Best ramen for crab. Goal -> Compare/Justify. Viz/Method -> Interactive Radar Chart (Chart.js). Interaction -> User clicks a ramen brand button, chart and descriptive text update to show that brand's profile. Justification -> A radar chart is ideal for multi-attribute comparison, and interactivity makes the analysis engaging. 3. Ramen Recipe: Report Info -> Ansungtangmyun recipe. Goal -> Inform/Instruct. Viz/Method -> Two-column HTML layout for ingredients/steps. Interaction -> Toggle for 'Simple' vs 'Pro' recipe. Justification -> Standard, easy-to-read recipe format enhanced with customization. -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Noto Sans KR', sans-serif;
+            background-color: #FFFBEB; 
+            color: #374151;
+        }
+        .nav-button, .ramen-btn, .recipe-btn {
+            transition: all 0.3s ease;
+        }
+        .nav-button.active, .ramen-btn.active, .recipe-btn.active {
+            background-color: #EF4444; 
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+        }
+        .content-section {
+            display: none;
+        }
+        .content-section.active {
+            display: block;
+        }
+        .card {
+            background-color: white;
+            border-radius: 0.75rem;
+            box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+        }
+        .chart-container {
+            position: relative;
+            margin: auto;
+            width: 90%;
+            max-width: 450px; 
+            aspect-ratio: 1 / 1;
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <div class="container mx-auto px-4 py-8 md:py-12">
+        <header class="text-center mb-10">
+            <h1 class="text-4xl md:text-5xl font-bold text-red-700 mb-2">🦀 궁극의 꽃게 요리 비법서 🦀</h1>
+            <p class="text-lg text-gray-600">꽃게찜부터 인생 라면까지, 최고의 꽃게 요리를 위한 완벽 가이드</p>
+        </header>
+
+        <nav class="flex justify-center space-x-2 md:space-x-4 mb-12">
+            <button id="nav-steam" class="nav-button active text-sm md:text-base font-semibold py-2 px-4 md:py-3 md:px-6 rounded-full bg-white shadow-md" onclick="switchTab('steam')">명품 꽃게찜 비법</button>
+            <button id="nav-ramen" class="nav-button text-sm md:text-base font-semibold py-2 px-4 md:py-3 md:px-6 rounded-full bg-white shadow-md" onclick="switchTab('ramen')">인생 꽃게라면 연구</button>
+        </nav>
+
+        <main>
+            <section id="content-steam" class="content-section active">
+                <div class="text-center mb-8">
+                    <h2 class="text-3xl font-bold text-gray-800">명품 꽃게찜: 본연의 맛을 살리는 기술</h2>
+                    <p class="mt-2 text-gray-600">살이 꽉 찬 꽃게의 달큰한 감칠맛을 100% 즐기는 방법입니다. 비린내 없이 촉촉하게 찌는 핵심 비법을 단계별로 알려드립니다.</p>
+                </div>
+                <div class="max-w-4xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="card p-6">
+                        <h3 class="text-2xl font-bold mb-4 flex items-center"><span class="flex items-center justify-center w-10 h-10 mr-4 text-xl font-bold text-white bg-red-600 rounded-full flex-shrink-0">1</span> 재료 준비 & 손질</h3>
+                        <p class="text-gray-700">신선한 활꽃게는 성공의 반입니다. 솔을 이용해 껍데기, 다리 사이, 배딱지 구석구석을 깨끗이 닦아주세요. 살아있는 게를 손질하기 어렵다면, 냉동실에 15-20분간 넣어 기절시키면 수월합니다.</p>
+                    </div>
+                    <div class="card p-6">
+                        <h3 class="text-2xl font-bold mb-4 flex items-center"><span class="flex items-center justify-center w-10 h-10 mr-4 text-xl font-bold text-white bg-red-600 rounded-full flex-shrink-0">2</span> 비린내 제거</h3>
+                        <p class="text-gray-700">찜기 물에 된장 반 스푼, 맛술 2스푼, 또는 청주를 약간 넣어주세요. 대파의 흰 부분이나 양파 조각을 함께 넣으면 게의 비린 향은 잡고 은은한 채소의 향이 더해져 풍미가 살아납니다.</p>
+                    </div>
+                    <div class="card p-6">
+                        <h3 class="text-2xl font-bold mb-4 flex items-center"><span class="flex items-center justify-center w-10 h-10 mr-4 text-xl font-bold text-white bg-red-600 rounded-full flex-shrink-0">3</span> 올바르게 안치기</h3>
+                        <p class="text-gray-700"><strong class="text-red-600">가장 중요한 포인트!</strong> 꽃게의 배가 하늘을 향하도록 찜기에 올려야 합니다. 등을 아래로 하면 찌는 과정에서 맛있는 내장이 모두 흘러내려 버립니다. 게들이 겹치지 않게 놓는 것이 좋습니다.</p>
+                    </div>
+                    <div class="card p-6">
+                        <h3 class="text-2xl font-bold mb-4 flex items-center"><span class="flex items-center justify-center w-10 h-10 mr-4 text-xl font-bold text-white bg-red-600 rounded-full flex-shrink-0">4</span> 황금 찌는 시간</h3>
+                        <p class="text-gray-700">물이 끓기 시작하면 찜기를 올리고 <strong class="text-red-600">센 불에서 15분, 불을 끄고 5분 뜸</strong>을 들이는 것이 황금 시간입니다. 찌는 도중 뚜껑을 열면 내부 온도가 내려가 게살이 익지 않고 비린내가 날 수 있으니 절대 열지 마세요.</p>
+                    </div>
+                </div>
+            </section>
+
+            <section id="content-ramen" class="content-section">
+                <div class="text-center mb-8">
+                    <h2 class="text-3xl font-bold text-gray-800">인생 꽃게라면 연구소</h2>
+                    <p class="mt-2 text-gray-600">꽃게 한 마리가 라면을 일품요리로 만듭니다. 최적의 라면 선택부터 황금 레시피까지, 꽃게라면의 모든 것을 분석해 드립니다.</p>
+                </div>
+
+                <div class="card max-w-5xl mx-auto p-6 md:p-8 mb-12">
+                    <h3 class="text-2xl font-bold text-center mb-2">꽃게라면 궁합 분석</h3>
+                    <p class="text-center text-gray-600 mb-6">각 라면의 특징을 분석하여 꽃게와의 궁합을 점수로 나타냈습니다. 버튼을 눌러 비교해보세요.</p>
+                    <div class="flex flex-col md:flex-row items-center gap-8">
+                        <div class="w-full md:w-1/2">
+                            <div class="chart-container">
+                                <canvas id="ramenChart"></canvas>
+                            </div>
+                        </div>
+                        <div class="w-full md:w-1/2">
+                            <div class="flex justify-center flex-wrap gap-2 mb-4">
+                                <button class="ramen-btn font-semibold py-2 px-4 rounded-full bg-gray-200 text-gray-800" onclick="updateChart('ansung')">안성탕면</button>
+                                <button class="ramen-btn font-semibold py-2 px-4 rounded-full bg-gray-200 text-gray-800" onclick="updateChart('shin')">신라면</button>
+                                <button class="ramen-btn font-semibold py-2 px-4 rounded-full bg-gray-200 text-gray-800" onclick="updateChart('jin_mild')">진라면(순한맛)</button>
+                                <button class="ramen-btn font-semibold py-2 px-4 rounded-full bg-gray-200 text-gray-800" onclick="updateChart('neoguri')">너구리</button>
+                            </div>
+                            <div id="ramen-description" class="p-4 bg-amber-50 rounded-lg min-h-[150px]">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="card max-w-5xl mx-auto p-6 md:p-8">
+                    <h3 class="text-2xl font-bold text-center mb-6">라면별 맞춤 황금 레시피</h3>
+                    <div id="recipe-content" class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script>
+        const ramenData = {
+            labels: ['국물 조화', '시원함', '구수함', '면발 궁합', '맵기'],
+            ansung: {
+                data: [5, 4, 5, 4, 2],
+                description: '<h5 class="font-bold text-lg mb-2 text-orange-900">결론: 최고의 선택, 안성탕면</h5><p class="text-sm text-orange-800">된장 베이스의 구수한 국물이 꽃게 내장의 녹진한 맛과 환상적인 조화를 이룹니다. 자극적이지 않아 꽃게 본연의 시원한 맛을 가장 잘 살려주는 라면입니다.</p>'
+            },
+            shin: {
+                data: [3, 3, 2, 5, 5],
+                description: '<h5 class="font-bold text-lg mb-2 text-gray-800">신라면</h5><p class="text-sm text-gray-700">특유의 강한 매운맛과 향이 꽃게의 섬세한 단맛을 가릴 수 있습니다. 얼큰하고 자극적인 맛을 선호한다면 좋은 선택이지만, 꽃게의 풍미를 온전히 느끼기엔 아쉬움이 있습니다.</p>'
+            },
+            jin_mild: {
+                data: [4, 4, 3, 4, 1],
+                description: '<h5 class="font-bold text-lg mb-2 text-gray-800">진라면 (순한맛)</h5><p class="text-sm text-gray-700">가장 무난하고 균형 잡힌 선택입니다. 맵지 않고 국물이 깔끔해 꽃게와 잘 어울리지만, 안성탕면만큼의 깊은 구수함이나 특별한 시너지를 내기는 어렵습니다.</p>'
+            },
+            neoguri: {
+                data: [4, 5, 3, 5, 3],
+                description: '<h5 class="font-bold text-lg mb-2 text-cyan-800">너구리</h5><p class="text-sm text-cyan-700">시원한 해물 베이스 국물과 두툼하고 쫄깃한 면발이 특징입니다. 꽃게와 만나면 바다의 풍미가 배가되어, 마치 해물우동 같은 깊은 맛을 냅니다. 씹는 맛을 중시한다면 훌륭한 선택입니다.</p>'
+            }
+        };
+
+        const recipeData = {
+            ansung: `
+                <div>
+                    <h4 class="text-xl font-semibold mb-4 border-b-2 border-red-500 pb-2">📋 재료: 구수함의 극치</h4>
+                    <ul class="space-y-2 text-gray-700">
+                        <li><strong>핵심:</strong> 안성탕면 1개, 꽃게 1마리, 물 550ml, 다진 마늘 1/2 스푼, 대파 약간</li>
+                        <li><strong>풍미 UP:</strong> 양파 1/4개, 애호박 약간, 쑥갓</li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="text-xl font-semibold mb-4 border-b-2 border-red-500 pb-2">🍳 조리법: 스프는 절반만!</h4>
+                    <ol class="space-y-4 text-gray-700">
+                        <li class="flex items-start"><span class="font-bold text-red-600 mr-2">1.</span> <span>손질한 꽃게를 2~4등분 합니다.</span></li>
+                        <li class="flex items-start"><span class="font-bold text-red-600 mr-2">2.</span> <span>냄비에 물, <strong class="text-red-500">분말 스프는 절반만 넣고</strong> 꽃게, 다진마늘, 양파를 넣고 끓여 육수를 냅니다.</span></li>
+                        <li class="flex items-start"><span class="font-bold text-red-600 mr-2">3.</span> <span>국물이 끓고 꽃게가 익으면 면, 애호박을 넣고 4분간 끓입니다. (간은 남은 스프로 조절)</span></li>
+                        <li class="flex items-start"><span class="font-bold text-red-600 mr-2">4.</span> <span>대파와 쑥갓을 올려 마무리합니다.</span></li>
+                    </ol>
+                </div>`,
+            shin: `
+                <div>
+                    <h4 class="text-xl font-semibold mb-4 border-b-2 border-red-500 pb-2">📋 재료: 매운맛과 감칠맛의 조화</h4>
+                    <ul class="space-y-2 text-gray-700">
+                        <li><strong>핵심:</strong> 신라면 1개, 꽃게 1마리, 물 600ml, 콩나물 한 줌, 다진 마늘 1/2 스푼</li>
+                        <li><strong>비법:</strong> <strong class="text-red-500">된장 1/2 티스푼</strong>, 대파, 청양고추</li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="text-xl font-semibold mb-4 border-b-2 border-red-500 pb-2">🍳 조리법: 된장 한 스푼의 마법</h4>
+                    <ol class="space-y-4 text-gray-700">
+                        <li class="flex items-start"><span class="font-bold text-red-600 mr-2">1.</span> <span>냄비에 물과 된장을 풀어줍니다. 손질한 꽃게를 넣고 끓여주세요.</span></li>
+                        <li class="flex items-start"><span class="font-bold text-red-600 mr-2">2.</span> <span>육수가 끓으면 분말스프, 건더기스프, 다진마늘을 넣습니다.</span></li>
+                        <li class="flex items-start"><span class="font-bold text-red-600 mr-2">3.</span> <span>면과 콩나물을 넣고 4분 30초간 끓입니다.</span></li>
+                        <li class="flex items-start"><span class="font-bold text-red-600 mr-2">4.</span> <span>대파, 청양고추를 넣고 불을 끕니다.</span></li>
+                    </ol>
+                </div>`,
+            jin_mild: `
+                <div>
+                    <h4 class="text-xl font-semibold mb-4 border-b-2 border-red-500 pb-2">📋 재료: 깔끔하고 시원한 국물</h4>
+                    <ul class="space-y-2 text-gray-700">
+                        <li><strong>핵심:</strong> 진라면(순한맛) 1개, 꽃게 1마리, 물 550ml, 무 한토막(나박썰기)</li>
+                        <li><strong>풍미 UP:</strong> 바지락 5알, 계란 1개, 대파, 후추</li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="text-xl font-semibold mb-4 border-b-2 border-red-500 pb-2">🍳 조리법: 무로 시원함 더하기</h4>
+                    <ol class="space-y-4 text-gray-700">
+                        <li class="flex items-start"><span class="font-bold text-red-600 mr-2">1.</span> <span>냄비에 물, 무, 손질한 꽃게, 바지락을 넣고 끓여 시원한 육수를 냅니다.</span></li>
+                        <li class="flex items-start"><span class="font-bold text-red-600 mr-2">2.</span> <span>물이 끓으면 면과 스프를 모두 넣습니다.</span></li>
+                        <li class="flex items-start"><span class="font-bold text-red-600 mr-2">3.</span> <span>면이 거의 익었을 때 계란을 풀어 넣고 바로 젓지 않습니다.</span></li>
+                        <li class="flex items-start"><span class="font-bold text-red-600 mr-2">4.</span> <span>대파와 후추를 뿌려 완성합니다.</span></li>
+                    </ol>
+                </div>`,
+            neoguri: `
+                <div>
+                    <h4 class="text-xl font-semibold mb-4 border-b-2 border-red-500 pb-2">📋 재료: 진한 해물우동 스타일</h4>
+                    <ul class="space-y-2 text-gray-700">
+                        <li><strong>핵심:</strong> 너구리 1개, 꽃게 1마리, 물 550ml, 너구리 속 다시마</li>
+                        <li><strong>풍미 UP:</strong> 홍합 4알, 어묵 1장, 쑥갓, 대파</li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="text-xl font-semibold mb-4 border-b-2 border-red-500 pb-2">🍳 조리법: 다시마를 처음부터!</h4>
+                    <ol class="space-y-4 text-gray-700">
+                        <li class="flex items-start"><span class="font-bold text-red-600 mr-2">1.</span> <span>냄비에 물, 손질한 꽃게, <strong class="text-red-500">다시마</strong>, 홍합을 넣고 끓여 해물 육수를 진하게 우려냅니다.</span></li>
+                        <li class="flex items-start"><span class="font-bold text-red-600 mr-2">2.</span> <span>물이 끓으면 면과 스프, 어묵을 넣고 5분간 끓입니다.</span></li>
+                        <li class="flex items-start"><span class="font-bold text-red-600 mr-2">3.</span> <span>그릇에 옮겨 담고 대파와 쑥갓을 듬뿍 올려줍니다.</span></li>
+                        <li class="flex items-start"><span class="font-bold text-red-600 mr-2">4.</span> <span>취향에 따라 고춧가루를 추가해도 좋습니다.</span></li>
+                    </ol>
+                </div>`
+        };
+
+        let ramenChart;
+
+        function setupChart() {
+            const ctx = document.getElementById('ramenChart').getContext('2d');
+            ramenChart = new Chart(ctx, {
+                type: 'radar',
+                data: {
+                    labels: ramenData.labels,
+                    datasets: [{
+                        label: '안성탕면',
+                        data: [],
+                        backgroundColor: 'rgba(239, 68, 68, 0.2)',
+                        borderColor: 'rgba(239, 68, 68, 1)',
+                        borderWidth: 2,
+                        pointBackgroundColor: 'rgba(239, 68, 68, 1)'
+                    }]
+                },
+                options: {
+                    maintainAspectRatio: false,
+                    scales: {
+                        r: {
+                            min: 0, max: 5,
+                            angleLines: { color: 'rgba(0, 0, 0, 0.1)' },
+                            grid: { color: 'rgba(0, 0, 0, 0.1)' },
+                            pointLabels: { font: { size: 14, weight: 'bold' }, color: '#4B5563' },
+                            ticks: { stepSize: 1, backdropColor: 'rgba(255, 251, 235, 0.5)' }
+                        }
+                    },
+                    plugins: { legend: { display: false } }
+                }
+            });
+        }
+
+        function updateChart(ramenKey) {
+            const data = ramenData[ramenKey];
+            const dataset = ramenChart.data.datasets[0];
+            
+            let label, bgColor, borderColor;
+            
+            if (ramenKey === 'ansung') {
+                label = '안성탕면'; bgColor = 'rgba(239, 68, 68, 0.2)'; borderColor = 'rgba(239, 68, 68, 1)';
+            } else if (ramenKey === 'shin') {
+                label = '신라면'; bgColor = 'rgba(220, 38, 38, 0.2)'; borderColor = 'rgba(220, 38, 38, 1)';
+            } else if (ramenKey === 'neoguri') {
+                label = '너구리'; bgColor = 'rgba(22, 163, 74, 0.2)'; borderColor = 'rgba(22, 163, 74, 1)';
+            } else {
+                label = '진라면(순한맛)'; bgColor = 'rgba(251, 191, 36, 0.2)'; borderColor = 'rgba(251, 191, 36, 1)';
+            }
+            
+            dataset.data = data.data;
+            dataset.label = label;
+            dataset.backgroundColor = bgColor;
+            dataset.borderColor = borderColor;
+            dataset.pointBackgroundColor = borderColor;
+            ramenChart.update();
+
+            document.getElementById('ramen-description').innerHTML = data.description;
+
+            document.querySelectorAll('.ramen-btn').forEach(btn => {
+                btn.classList.remove('active');
+                btn.classList.remove('bg-orange-100', 'text-orange-800');
+                btn.classList.add('bg-gray-200', 'text-gray-800');
+            });
+            
+            const activeBtn = document.querySelector(`.ramen-btn[onclick="updateChart('${ramenKey}')"]`);
+            activeBtn.classList.add('active');
+            activeBtn.classList.remove('bg-gray-200', 'text-gray-800');
+            activeBtn.classList.add('bg-orange-100', 'text-orange-800');
+            
+            updateRecipe(ramenKey);
+        }
+
+        function updateRecipe(ramenKey) {
+            document.getElementById('recipe-content').innerHTML = recipeData[ramenKey];
+        }
+
+        function switchTab(tabName) {
+            document.querySelectorAll('.content-section').forEach(section => section.classList.remove('active'));
+            document.getElementById(`content-${tabName}`).classList.add('active');
+
+            document.querySelectorAll('.nav-button').forEach(button => button.classList.remove('active'));
+            document.getElementById(`nav-${tabName}`).classList.add('active');
+            
+            if (tabName === 'ramen') {
+                if (!ramenChart) {
+                    setupChart();
+                }
+                updateChart('ansung');
+            }
+        }
+        
+        window.onload = function() {
+            switchTab('steam');
+        };
+    </script>
+
+</body>
+</html>
+
