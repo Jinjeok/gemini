@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>2025 대한민국 가상 전략 보고서: 유비와 제갈량</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Modern Scholar -->
+    <!-- Application Structure Plan: The application is designed as an interactive strategic briefing dashboard with five thematic tabs: Overview, Domestic Policy, Foreign Policy, Military Strategy, and Scenarios. This non-linear, tabbed structure was chosen over a simple linear report to allow users to freely explore different facets of the complex hypothetical scenario at their own pace. The goal is to transform passive reading into an active exploration of strategy. Key interactions include clickable policy cards to reveal details, a dynamic relationship map for foreign policy analysis, and a choice-based system for hypothetical crises. This structure enhances user engagement and makes the dense, qualitative information more digestible and memorable. -->
+    <!-- Visualization & Content Choices: 
+    - Report Info: Key figures (Liu Bei, Zhuge Liang). Goal: Inform. Viz/Presentation: Profile cards with key attributes. Interaction: Hover effects. Justification: Provides a quick, scannable introduction to the main actors. Method: HTML/Tailwind.
+    - Report Info: Domestic policies based on 'virtue'. Goal: Organize. Viz/Presentation: A grid of interactive cards. Interaction: Click to expand for details. Justification: Keeps the UI clean while offering depth on demand. Method: HTML/Tailwind/JS.
+    - Report Info: Geopolitical strategy ('New Longzhong Plan'). Goal: Relationships. Viz/Presentation: A stylized, non-map diagram of East Asian powers. Interaction: Buttons for each country update the diagram and a corresponding text panel. Justification: Visualizes complex relationships more effectively than text alone. Method: HTML/Tailwind/JS.
+    - Report Info: National approval rating. Goal: Inform/Compare. Viz/Presentation: Donut Chart. Interaction: Tooltips on hover. Justification: Provides a quick visual summary of public sentiment. Library: Chart.js.
+    - Report Info: Military modernization. Goal: Compare. Viz/Presentation: Radar Chart. Interaction: Tooltips on hover. Justification: Effectively compares 'before' and 'after' states across multiple metrics. Library: Chart.js.
+    - Report Info: Crisis response. Goal: Engage. Viz/Presentation: Interactive scenario with choices and outcomes. Interaction: User clicks a choice button to see the resulting text-based outcome. Justification: This is the most engaging element, allowing users to apply the report's concepts. Method: HTML/Tailwind/JS.
+    -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Noto Sans KR', sans-serif;
+            background-color: #F8F7F2; 
+            color: #3D405B;
+        }
+        .tab-btn {
+            transition: all 0.3s ease;
+            border-bottom: 4px solid transparent;
+        }
+        .tab-btn.active {
+            color: #3D405B;
+            border-bottom-color: #81B29A;
+        }
+        .card {
+            background-color: #FFFFFF;
+            border: 1px solid #E0E0E0;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1);
+        }
+        .relation-map-node {
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 500;
+            position: absolute;
+            transition: all 0.3s ease;
+            border: 3px solid #D6D6D6;
+            background-color: #fff;
+        }
+        .relation-map-line {
+            position: absolute;
+            background-color: #D6D6D6;
+            height: 3px;
+            transform-origin: left center;
+            transition: all 0.3s ease;
+            z-index: -1;
+        }
+        .chart-container {
+            position: relative;
+            margin: auto;
+            height: 40vh;
+            width: 100%;
+            max-width: 500px;
+            max-height: 400px;
+        }
+        .fade-in {
+            animation: fadeIn 0.8s ease-in-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body class="antialiased">
+    <div class="container mx-auto p-4 md:p-8">
+        <header class="text-center mb-8">
+            <h1 class="text-3xl md:text-5xl font-bold text-[#3D405B]">2025 대한민국 가상 전략 보고서</h1>
+            <p class="text-lg md:text-xl mt-2 text-[#81B29A] font-medium">유비와 제갈량, 현대 국가를 경영하다</p>
+        </header>
+
+        <nav class="flex justify-center border-b border-gray-200 mb-8 space-x-2 md:space-x-8">
+            <button class="tab-btn active py-4 px-2 md:px-6 text-sm md:text-lg font-semibold text-gray-500 focus:outline-none" onclick="showTab('overview')">개요</button>
+            <button class="tab-btn py-4 px-2 md:px-6 text-sm md:text-lg font-semibold text-gray-500 focus:outline-none" onclick="showTab('domestic')">국내 정치</button>
+            <button class="tab-btn py-4 px-2 md:px-6 text-sm md:text-lg font-semibold text-gray-500 focus:outline-none" onclick="showTab('foreign')">외교 안보</button>
+            <button class="tab-btn py-4 px-2 md:px-6 text-sm md:text-lg font-semibold text-gray-500 focus:outline-none" onclick="showTab('military')">군사 전략</button>
+            <button class="tab-btn py-4 px-2 md:px-6 text-sm md:text-lg font-semibold text-gray-500 focus:outline-none" onclick="showTab('scenario')">가상 시나리오</button>
+        </nav>
+
+        <main id="content-container">
+            <section id="overview" class="content-section fade-in">
+                <div class="card p-6 md:p-8">
+                    <h2 class="text-2xl font-bold mb-4 text-[#3D405B]">시나리오 개요: 새로운 시대의 서막</h2>
+                    <p class="text-gray-600 leading-relaxed mb-6">
+                        2025년, 대한민국은 전례 없는 리더십의 변화를 맞이한다. 깊은 정치적 불신과 사회적 갈등 속에서 국민의 열망은 시대를 초월한 인물, 유비와 제갈량을 현대 정치의 중심으로 소환했다. 본 보고서는 유비 대통령과 제갈량 국무총리가 펼치는 국가 경영 전략을 심도 있게 분석하고, 그들이 마주할 도전과 기회를 가상으로 시뮬레이션한다. 인(仁)과 의(義)의 정치가 21세기 대한민국에서 어떻게 구현될 수 있을지 탐구하는 것이 이 보고서의 핵심 목표이다.
+                    </p>
+                    <div class="grid md:grid-cols-2 gap-6">
+                        <div class="border p-6 rounded-lg bg-gray-50">
+                            <h3 class="text-xl font-bold text-center mb-3">유비 (玄德) - 대통령</h3>
+                            <p class="text-center text-sm text-[#81B29A] mb-4">덕(德)으로 사람을 품는 지도자</p>
+                            <ul class="space-y-2 text-gray-700">
+                                <li><strong>리더십:</strong> 포용과 경청, 인의예지(仁義禮智) 기반</li>
+                                <li><strong>핵심 정책:</strong> 국민 대통합, 사회적 신뢰 회복</li>
+                                <li><strong>역할:</strong> 국가의 상징적 구심점이자 최종 결정권자</li>
+                                <li><strong>2025년 과제:</strong> 분열된 국론 통합, 경제적 불평등 해소</li>
+                            </ul>
+                        </div>
+                        <div class="border p-6 rounded-lg bg-gray-50">
+                            <h3 class="text-xl font-bold text-center mb-3">제갈량 (孔明) - 국무총리 겸 국방부장관</h3>
+                            <p class="text-center text-sm text-[#81B29A] mb-4">천하를 꿰뚫는 비전의 전략가</p>
+                            <ul class="space-y-2 text-gray-700">
+                                <li><strong>리더십:</strong> 데이터 기반의 냉철한 분석과 장기적 비전</li>
+                                <li><strong>핵심 정책:</strong> 신(新) 융중대, 기술 기반 국방 혁신</li>
+                                <li><strong>역할:</strong> 내치와 외교, 국방의 실질적 설계자</li>
+                                <li><strong>2025년 과제:</strong> 미중 패권 경쟁 속 국가 생존 전략 수립</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="domestic" class="content-section hidden fade-in">
+                <div class="card p-6 md:p-8">
+                     <h2 class="text-2xl font-bold mb-2 text-[#3D405B]">국내 정치: 덕치(德治)의 현대적 구현</h2>
+                     <p class="text-gray-600 leading-relaxed mb-8 text-center">유비 대통령의 통치 철학인 '덕치'는 국민 개개인을 국가의 근본으로 여기는 것에서 시작합니다. 이는 사회적 신뢰를 회복하고 공동체의 번영을 이끌기 위한 핵심 전략입니다. 아래 카드들을 클릭하여 주요 정책 분야를 탐색해 보세요.</p>
+                     <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+                        <div class="policy-card p-6 border rounded-lg hover:shadow-lg cursor-pointer transition" data-title="국민 대통합" data-content="지역, 세대, 이념 갈등을 넘어 '하나의 대한민국'을 목표로 합니다. 대통령 직속 '화백 위원회'를 신설하여 사회 각계각층의 목소리를 직접 국정에 반영하고, 주요 정책 결정 과정에서의 국민 참여를 법제화하여 절차적 민주주의를 강화합니다.">
+                            <h3 class="text-lg font-bold text-center">🤝 국민 대통합</h3>
+                        </div>
+                        <div class="policy-card p-6 border rounded-lg hover:shadow-lg cursor-pointer transition" data-title="경제 정의 실현" data-content="공정한 시장 질서를 확립하고 부의 편중을 완화하는 데 중점을 둡니다. 초과이익공유제를 도입하여 대기업과 중소기업의 상생을 유도하고, 부동산 투기로 인한 불로소득을 강력히 환수하여 조세 정의를 실현합니다.">
+                            <h3 class="text-lg font-bold text-center">⚖️ 경제 정의 실현</h3>
+                        </div>
+                        <div class="policy-card p-6 border rounded-lg hover:shadow-lg cursor-pointer transition" data-title="인재 등용과 공직 기강 확립" data-content="제갈량 총리의 주도 하에 출신과 배경을 불문하고 오직 능력과 청렴성으로 인재를 등용하는 '신(新) 칠출기(七出奇)' 인사 시스템을 도입합니다. 고위 공직자 비리에 대해서는 무관용 원칙을 적용하여 신뢰받는 정부를 구축합니다.">
+                            <h3 class="text-lg font-bold text-center">🏛️ 인재 등용과 공직 기강</h3>
+                        </div>
+                     </div>
+                     <div id="policy-details" class="hidden p-6 bg-gray-50 rounded-lg">
+                        <h3 id="policy-title" class="text-xl font-bold mb-3"></h3>
+                        <p id="policy-content" class="text-gray-700 leading-relaxed"></p>
+                     </div>
+                     <div class="mt-8">
+                        <h3 class="text-xl font-bold text-center mb-4">유비 정부 국정 지지도</h3>
+                        <div class="chart-container">
+                            <canvas id="approvalRatingChart"></canvas>
+                        </div>
+                     </div>
+                </div>
+            </section>
+
+            <section id="foreign" class="content-section hidden fade-in">
+                <div class="card p-6 md:p-8">
+                    <h2 class="text-2xl font-bold mb-2 text-[#3D405B]">외교 안보: 신(新) 융중대(隆中對) 전략</h2>
+                    <p class="text-gray-600 leading-relaxed mb-8 text-center">제갈량 총리가 수립한 '신 융중대'는 21세기 한반도의 지정학적 현실을 반영한 다차원적 외교 안보 전략입니다. 특정 강대국에 대한 의존에서 벗어나, 국익을 최우선으로 하는 실리적 균형 외교를 추구합니다. 아래 버튼을 클릭하여 각 국가에 대한 맞춤형 전략을 확인하십시오.</p>
+                    <div class="flex flex-col lg:flex-row gap-8">
+                        <div class="flex-1">
+                            <div class="flex justify-center flex-wrap gap-2 mb-6">
+                                <button class="relation-btn px-4 py-2 bg-blue-100 text-blue-800 rounded-full" data-target="usa">미국</button>
+                                <button class="relation-btn px-4 py-2 bg-red-100 text-red-800 rounded-full" data-target="china">중국</button>
+                                <button class="relation-btn px-4 py-2 bg-gray-100 text-gray-800 rounded-full" data-target="nkorea">북한</button>
+                                <button class="relation-btn px-4 py-2 bg-yellow-100 text-yellow-800 rounded-full" data-target="japan">일본</button>
+                                <button class="relation-btn px-4 py-2 bg-indigo-100 text-indigo-800 rounded-full" data-target="russia">러시아</button>
+                            </div>
+                            <div id="relation-map" class="relative w-full h-80 md:h-96 mx-auto bg-gray-50 rounded-lg">
+                                <div id="map-line-usa" class="relation-map-line"></div>
+                                <div id="map-line-china" class="relation-map-line"></div>
+                                <div id="map-line-nkorea" class="relation-map-line"></div>
+                                <div id="map-line-japan" class="relation-map-line"></div>
+                                <div id="map-line-russia" class="relation-map-line"></div>
+                                <div class="relation-map-node w-24 h-24" style="top: 50%; left: 50%; transform: translate(-50%, -50%); border-color: #81B29A; z-index: 10;">대한민국</div>
+                                <div id="node-usa" class="relation-map-node w-20 h-20" style="top: 10%; left: 15%;">미국</div>
+                                <div id="node-china" class="relation-map-node w-20 h-20" style="top: 10%; left: 65%;">중국</div>
+                                <div id="node-nkorea" class="relation-map-node w-20 h-20" style="top: 40%; left: 80%;">북한</div>
+                                <div id="node-japan" class="relation-map-node w-20 h-20" style="top: 70%; left: 65%;">일본</div>
+                                <div id="node-russia" class="relation-map-node w-20 h-20" style="top: 70%; left: 15%;">러시아</div>
+                            </div>
+                        </div>
+                        <div id="strategy-details" class="flex-1 lg:w-1/3 p-6 bg-white border rounded-lg">
+                            <h3 id="strategy-title" class="text-xl font-bold mb-3 text-gray-800">국가를 선택하세요</h3>
+                            <p id="strategy-content" class="text-gray-600 leading-relaxed">각 국가에 대한 제갈량의 외교 전략이 여기에 표시됩니다.</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="military" class="content-section hidden fade-in">
+                <div class="card p-6 md:p-8">
+                    <h2 class="text-2xl font-bold mb-2 text-[#3D405B]">군사 전략: 기술과 지략의 융합</h2>
+                     <p class="text-gray-600 leading-relaxed mb-8 text-center">제갈량 국방장관은 '싸우지 않고 이기는 것'을 최상의 목표로 삼되, '반드시 이기는 군대'를 건설하는 데 총력을 기울입니다. 그의 전략은 첨단 기술과 고대 병법의 지혜를 결합하여 예측 불가능하고 효율적인 국방 체계를 구축하는 것입니다.</p>
+                    <div class="grid md:grid-cols-2 gap-8">
+                        <div>
+                            <h3 class="text-xl font-bold text-center mb-4">제갈량의 핵심 군사 원칙</h3>
+                            <div class="space-y-4">
+                                <div class="p-4 bg-gray-50 rounded-lg">
+                                    <h4 class="font-semibold">허실(虛實)과 기만</h4>
+                                    <p class="text-sm text-gray-600">AI 기반 사이버 심리전 부대를 창설하여 적의 정보 체계를 교란하고, 가상 정보를 통해 아군의 군사적 의도를 은폐합니다.</p>
+                                </div>
+                                <div class="p-4 bg-gray-50 rounded-lg">
+                                    <h4 class="font-semibold">정보 우위 확보</h4>
+                                    <p class="text-sm text-gray-600">정찰위성, 무인정찰기(드론) 네트워크를 통합한 '천리안(千里眼) 프로젝트'를 통해 한반도 전역의 군사 동향을 24시간 감시합니다.</p>
+                                </div>
+                                 <div class="p-4 bg-gray-50 rounded-lg">
+                                    <h4 class="font-semibold">비대칭 전력 강화</h4>
+                                    <p class="text-sm text-gray-600">소수 정예의 특수부대와 자율 드론 편대를 결합하여, 적의 핵심 시설을 신속하고 정밀하게 타격할 수 있는 '팔진도(八陣圖) 타격 시스템'을 구축합니다.</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div>
+                             <h3 class="text-xl font-bold text-center mb-4">국방력 변화 비교</h3>
+                             <div class="chart-container">
+                                <canvas id="militaryPowerChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="scenario" class="content-section hidden fade-in">
+                <div class="card p-6 md:p-8">
+                    <h2 class="text-2xl font-bold mb-2 text-[#3D405B]">가상 위기 대응 시나리오</h2>
+                    <p class="text-gray-600 leading-relaxed mb-6 text-center">국가 경영에는 예측 불가능한 위기가 따릅니다. 아래 제시된 위기 상황에 대해 유비와 제갈량의 리더십은 어떤 선택을 내릴 것인지, 그리고 그 선택이 어떤 결과를 가져올지 탐색해 보십시오.</p>
+                    <div id="scenario-container" class="bg-gray-50 p-6 rounded-lg border">
+                        <div id="scenario-description">
+                            <h3 class="text-xl font-bold mb-3">상황 발생: 서해상에서의 군사적 도발</h3>
+                            <p class="mb-4">북한 경비정이 서해 NLL을 침범하여 아군 고속정과 대치하는 상황이 발생했습니다. 일촉즉발의 위기 속에서 제한적인 교전이 발생했으며, 양측에 경미한 피해가 보고되었습니다. 이 상황을 어떻게 관리하시겠습니까?</p>
+                            <div class="flex flex-col md:flex-row justify-center gap-4 mt-6">
+                                <button class="scenario-choice-btn p-3 bg-[#81B29A] text-white rounded-lg hover:bg-[#6a9a81] transition" data-outcome="A">
+                                    <strong>선택 A:</strong> 원칙적 강경 대응
+                                </button>
+                                <button class="scenario-choice-btn p-3 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition" data-outcome="B">
+                                    <strong>선택 B:</strong> 외교적 해법 우선
+                                </button>
+                                <button class="scenario-choice-btn p-3 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition" data-outcome="C">
+                                    <strong>선택 C:</strong> 제3의 길 모색
+                                </button>
+                            </div>
+                        </div>
+                        <div id="scenario-outcome" class="hidden">
+                             <h3 id="outcome-title" class="text-xl font-bold mb-3"></h3>
+                             <p id="outcome-text" class="mb-4"></p>
+                             <button id="scenario-reset-btn" class="p-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 transition">다른 선택 보기</button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+        </main>
+    </div>
+
+    <script>
+        const contentContainer = document.getElementById('content-container');
+        const policyCards = document.querySelectorAll('.policy-card');
+        const policyDetails = document.getElementById('policy-details');
+        const policyTitle = document.getElementById('policy-title');
+        const policyContent = document.getElementById('policy-content');
+        let activeCard = null;
+
+        const foreignStrategyData = {
+            usa: {
+                title: "對美 전략: 동맹의 재정의",
+                content: "전통적 군사 동맹을 넘어 기술, 경제, 가치를 공유하는 포괄적 동맹으로 격상시킵니다. '자주국방'을 강화하면서도 첨단 기술 협력을 통해 동맹의 질을 높이고, 이를 기반으로 동북아 정세에서 주도적인 목소리를 냅니다."
+            },
+            china: {
+                title: "對中 전략: 정경분리(政經分離)와 실리",
+                content: "안보 문제는 단호히 대응하되, 경제 협력의 끈은 놓지 않는 '정경분리' 원칙을 고수합니다. 공급망 다변화를 통해 경제적 의존도를 낮추고, 동시에 환경, 보건 등 초국가적 위협에 대해서는 협력하며 갈등을 관리합니다."
+            },
+            nkorea: {
+                title: "對北 전략: 관여와 억제",
+                content: "군사적 도발에 대해서는 압도적인 억제력을 바탕으로 단호히 대응합니다. 그러나 인도적 지원 및 문화 교류의 문은 열어두어 북한의 변화를 유도하고, 장기적으로는 평화 체제 구축을 위한 대화의 동력을 유지합니다."
+            },
+            japan: {
+                title: "對日 전략: 미래지향적 협력",
+                content: "과거사 문제는 원칙적으로 대응하되, 미래 세대를 위한 실질적 협력 관계를 구축합니다. 경제, 기술, 인적 교류를 확대하여 양국 국민 간의 신뢰를 회복하고, 동북아의 안정과 번영을 위한 파트너십을 강화합니다."
+            },
+            russia: {
+                title: "對러 전략: 북방 경제 개척",
+                content: "유라시아 대륙과의 연결성을 강화하는 '북방 경제'를 추진합니다. 에너지, 물류, 인프라 분야에서 협력하여 경제적 활로를 모색하고, 이를 통해 한반도 평화 프로세스에 러시아의 건설적인 역할을 유도합니다."
+            }
+        };
+        
+        const scenarioOutcomes = {
+            A: {
+                title: "결과: 원칙적 강경 대응",
+                text: "유비 대통령은 '국민의 생명과 안전이 최우선'임을 천명하고, 제갈량 총리는 도발 원점에 대한 비례적이고 정밀한 타격을 지시합니다. 군사적 긴장은 최고조에 달하지만, 단호한 대응으로 추가 도발의 의지를 꺾습니다. 국내적으로는 안보 불안감이 커지나, 정부의 결단력에 대한 지지 여론도 함께 상승합니다. 국제사회는 우려를 표하지만, 자위권 행사라는 점에서 묵인하는 분위기입니다."
+            },
+            B: {
+                title: "결과: 외교적 해법 우선",
+                text: "유비 대통령은 '전쟁은 최후의 수단'이라며 인내를 강조하고, 제갈량 총리는 즉시 미국, 중국 등 주변국과의 외교 채널을 총동원합니다. 국제 사회의 공조를 통해 북한을 압박하고, 군사적 충돌을 외교적 승리로 전환하려 시도합니다. 이 선택은 확전을 막았다는 점에서 긍정적 평가를 받지만, 일각에서는 '나약한 대응'이라는 비판에 직면하며 국내 정치적 부담으로 작용할 수 있습니다."
+            },
+            C: {
+                title: "결과: 제3의 길 모색",
+                text: "제갈량 총리는 '허실(虛實)의 계'를 활용합니다. 공식적으로는 외교적 해결을 강조하며 유화적 메시지를 보내는 한편, 비공식적으로는 사이버 부대를 동원하여 북한 군 지휘부의 통신망을 일시적으로 마비시킵니다. 혼란에 빠진 북한이 대화에 응할 수밖에 없는 상황을 만들어냅니다. 이 전략은 군사적 충돌 없이 실리를 취했지만, 만약 실패했을 경우 더 큰 위기를 초래할 수 있는 고도의 리스크를 감수한 선택입니다."
+            }
+        };
+
+        function showTab(tabId) {
+            document.querySelectorAll('.content-section').forEach(section => {
+                section.classList.add('hidden');
+            });
+            document.getElementById(tabId).classList.remove('hidden');
+            
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            document.querySelector(`.tab-btn[onclick="showTab('${tabId}')"]`).classList.add('active');
+            
+            contentContainer.classList.remove('fade-in');
+            void contentContainer.offsetWidth; 
+            contentContainer.classList.add('fade-in');
+        }
+        
+        policyCards.forEach(card => {
+            card.addEventListener('click', () => {
+                if (activeCard === card) {
+                    policyDetails.classList.add('hidden');
+                    activeCard.classList.remove('bg-gray-100', 'ring-2', 'ring-[#81B29A]');
+                    activeCard = null;
+                } else {
+                    if (activeCard) {
+                        activeCard.classList.remove('bg-gray-100', 'ring-2', 'ring-[#81B29A]');
+                    }
+                    policyTitle.textContent = card.dataset.title;
+                    policyContent.textContent = card.dataset.content;
+                    policyDetails.classList.remove('hidden');
+                    card.classList.add('bg-gray-100', 'ring-2', 'ring-[#81B29A]');
+                    activeCard = card;
+                }
+            });
+        });
+
+        document.querySelectorAll('.relation-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const target = e.target.dataset.target;
+                const data = foreignStrategyData[target];
+                document.getElementById('strategy-title').textContent = data.title;
+                document.getElementById('strategy-content').textContent = data.content;
+
+                updateRelationMap(target);
+            });
+        });
+
+        function updateRelationMap(target) {
+            const center = { x: 50, y: 50 };
+            const nodePositions = {
+                usa: { x: 25, y: 20 },
+                china: { x: 75, y: 20 },
+                nkorea: { x: 90, y: 50 },
+                japan: { x: 75, y: 80 },
+                russia: { x: 25, y: 80 }
+            };
+
+            document.querySelectorAll('.relation-map-node').forEach(node => {
+                node.style.borderColor = '#D6D6D6';
+                node.style.fontWeight = '500';
+            });
+            document.querySelectorAll('.relation-map-line').forEach(line => line.style.backgroundColor = '#D6D6D6');
+
+            const activeNode = document.getElementById(`node-${target}`);
+            if (activeNode) {
+                activeNode.style.borderColor = '#81B29A';
+                activeNode.style.fontWeight = '700';
+            }
+
+            const activeLine = document.getElementById(`map-line-${target}`);
+            if (activeLine) {
+                const pos = nodePositions[target];
+                const dx = pos.x - center.x;
+                const dy = pos.y - center.y;
+                const distance = Math.sqrt(dx * dx + dy * dy) * 0.8;
+                const angle = Math.atan2(dy, dx) * (180 / Math.PI);
+                
+                activeLine.style.width = `${distance}%`;
+                activeLine.style.top = `${center.y}%`;
+                activeLine.style.left = `${center.x}%`;
+                activeLine.style.transform = `rotate(${angle}deg)`;
+                activeLine.style.backgroundColor = '#81B29A';
+            }
+        }
+        
+        document.querySelectorAll('.scenario-choice-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const outcomeKey = e.currentTarget.dataset.outcome;
+                const outcomeData = scenarioOutcomes[outcomeKey];
+                
+                document.getElementById('scenario-description').classList.add('hidden');
+                document.getElementById('scenario-outcome').classList.remove('hidden');
+                
+                document.getElementById('outcome-title').textContent = outcomeData.title;
+                document.getElementById('outcome-text').textContent = outcomeData.text;
+            });
+        });
+        
+        document.getElementById('scenario-reset-btn').addEventListener('click', () => {
+            document.getElementById('scenario-outcome').classList.add('hidden');
+            document.getElementById('scenario-description').classList.remove('hidden');
+        });
+
+        const initCharts = () => {
+            const approvalCtx = document.getElementById('approvalRatingChart').getContext('2d');
+            new Chart(approvalCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['신뢰 기반 정치', '사회 통합', '공정성', '경제 안정'],
+                    datasets: [{
+                        label: '국정 지지도 요인',
+                        data: [40, 30, 20, 10],
+                        backgroundColor: ['#81B29A', '#F2CC8F', '#E07A5F', '#3D405B'],
+                        borderColor: '#F8F7F2',
+                        borderWidth: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'bottom' },
+                        title: { display: false },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return `${context.label}: ${context.raw}%`;
+                                }
+                            }
+                        }
+                    },
+                    cutout: '60%'
+                }
+            });
+
+            const militaryCtx = document.getElementById('militaryPowerChart').getContext('2d');
+            new Chart(militaryCtx, {
+                type: 'radar',
+                data: {
+                    labels: ['정보/정찰', '사이버전', '기동 타격력', '비대칭 전력', '병력 사기', '지휘 통신'],
+                    datasets: [
+                        {
+                            label: '개혁 이전',
+                            data: [65, 50, 70, 40, 60, 75],
+                            backgroundColor: 'rgba(224, 122, 95, 0.2)',
+                            borderColor: '#E07A5F',
+                            pointBackgroundColor: '#E07A5F',
+                            pointBorderColor: '#fff',
+                            pointHoverBackgroundColor: '#fff',
+                            pointHoverBorderColor: '#E07A5F'
+                        },
+                        {
+                            label: '개혁 이후 (제갈량)',
+                            data: [90, 85, 80, 95, 80, 90],
+                            backgroundColor: 'rgba(129, 178, 154, 0.2)',
+                            borderColor: '#81B29A',
+                            pointBackgroundColor: '#81B29A',
+                            pointBorderColor: '#fff',
+                            pointHoverBackgroundColor: '#fff',
+                            pointHoverBorderColor: '#81B29A'
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        r: {
+                            angleLines: { color: 'rgba(0, 0, 0, 0.1)' },
+                            grid: { color: 'rgba(0, 0, 0, 0.1)' },
+                            pointLabels: { font: { size: 12 } },
+                            suggestedMin: 0,
+                            suggestedMax: 100
+                        }
+                    },
+                     plugins: {
+                        legend: { position: 'bottom' }
+                    }
+                }
+            });
+        };
+        
+        window.onload = initCharts;
+    </script>
+</body>
+</html>
