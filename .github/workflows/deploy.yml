@@ -1,18 +1,26 @@
+# .github/workflows/deploy.yml
+
 name: Build and Deploy to GitHub Pages
 
 on:
   push:
     branches:
-      - main  # main 브랜치에 푸시될 때마다 실행됩니다.
+      - main
 
-permissions:
-  contents: write # 레포지토리에 커밋을 생성하기 위한 권한
-  pages: write    # GitHub Pages에 배포하기 위한 권한
-  id-token: write # 인증을 위한 권한
+concurrency:
+  group: "pages"
+  cancel-in-progress: true
 
 jobs:
-  build-and-deploy:
+  # --------------------
+  # 1. 빌드 및 커밋(Build & Commit) 잡
+  # --------------------
+  build:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write # 레포지토리에 커밋하기 위한 권한
+      pages: write      # GitHub Pages 아티팩트를 업로드하기 위한 권한
+      id-token: write   # 인증을 위한 권한
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -20,32 +28,48 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20' # Node.js 버전 지정
+          node-version: '20'
 
       - name: Generate index.html
         run: node generate-index.js
 
+      # --- 💡 여기를 수정했습니다 ---
       - name: Commit and Push changes
         run: |
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
           git add index.html
-          # 변경 사항이 있을 때만 커밋
-          git diff --quiet && git diff --staged --quiet || git commit -m "Automated: Update index.html"
-          git push
+          # 변경 사항이 있을 때만 커밋 및 푸시
+          if ! git diff-index --quiet HEAD; then
+            echo "Changes found. Committing and pushing..."
+            git commit -m "Automated: Update index.html"
+            git push
+          else
+            echo "No changes to commit."
+          fi
+      # ------------------------
 
       - name: Setup Pages
         uses: actions/configure-pages@v5
 
-      - name: Build with Jekyll (or your static site generator)
-        uses: actions/jekyll-build-pages@v1
-        with:
-          source: ./
-          destination: ./_site
-
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
+        with:
+          path: '.'
 
+  # --------------------
+  # 2. 배포(Deploy) 잡 (수정 필요 없음)
+  # --------------------
+  deploy:
+    needs: build
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
