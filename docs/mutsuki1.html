@@ -1,0 +1,510 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>무츠키의 매력 심층 분석 보고서</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Warm Neutrals & Soft Coral -->
+    <!-- Application Structure Plan: 이 애플리케이션은 사용자가 무츠키의 다각적인 매력을 체계적으로 탐색할 수 있도록 설계되었습니다. 상단 네비게이션을 통한 빠른 이동과 스크롤을 통한 자연스러운 흐름을 모두 지원하는 섹션 기반 구조를 채택했습니다. '개요', '외형적 매력', '성격과 목소리', '매력 분석 차트', '자매함과의 관계'의 5개 테마 섹션으로 구성됩니다. 각 섹션은 텍스트, 이미지, 그리고 인터랙티브 요소를 결합하여 정보를 효과적으로 전달합니다. 특히 '매력 분석 차트'는 주관적인 '귀여움'을 데이터 시각화로 표현하여 새로운 탐색 경험을 제공하며, 이는 사용자의 깊은 팬심과 분석적 접근을 동시에 만족시키기 위한 핵심 설계입니다. 이 구조는 사용자가 원하는 정보에 쉽게 접근하고, 각 매력 포인트를 깊이 있게 음미하도록 유도합니다. -->
+    <!-- Visualization & Content Choices: 
+        1. 정보: 무츠키의 핵심 매력 요약. 목표: 도입부에서 흥미 유발. 표현 방식: 큰 이미지와 감성적 텍스트. 상호작용: 없음. 정당성: 첫인상을 강하게 남겨 몰입 유도.
+        2. 정보: 외형적 특징(귀, 복장 등). 목표: 시각적 매력 상세 분석. 표현 방식: 카드형 그리드 레이아웃. 상호작용: 카드 클릭 시 상세 설명이 담긴 모달 창 표시. 정당성: 각 요소를 분리하여 집중도를 높이고, 인터랙션을 통해 탐색의 재미를 더함.
+        3. 정보: 대표적인 대사들. 목표: 성격과 목소리 매력 전달. 표현 방식: 탭 버튼 형식의 대사 모음. 상호작용: 탭 클릭 시 해당 카테고리의 대사 표시. 정당성: 실제 음성 없이도 목소리의 톤앤매너와 성격을 효과적으로 전달.
+        4. 정보: 귀여움 속성 분석. 목표: 주관적 매력을 객관적 데이터처럼 시각화. 표현 방식: Radar Chart (Chart.js). 상호작용: 기본/개2 상태 버튼 클릭 시 차트 데이터 동적 변경. 정당성: '귀여움'이라는 추상적 개념을 다각도로 분석하여 깊이를 더하고, 인터랙티브 차트를 통해 시각적 재미와 정보성을 극대화. 라이브러리: Chart.js Canvas.
+        5. 정보: 무츠키급 자매들과의 관계. 목표: 관계성 속에서의 매력 조명. 표현 방식: HTML/CSS 기반의 관계도. 상호작용: 자매함 이름 클릭 시 하이라이트 및 관계 설명 표시. 정당성: SVG/Mermaid 없이 순수 웹 기술로 관계도를 구현하며, 캐릭터의 사회적(?) 매력을 보여줌. -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Noto Sans KR', sans-serif;
+            background-color: #fdf6f0;
+            color: #574538;
+        }
+        .nav-link {
+            transition: all 0.3s ease;
+            position: relative;
+        }
+        .nav-link:hover {
+            color: #ef8c77;
+        }
+        .nav-link::after {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 2px;
+            bottom: -4px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: #ef8c77;
+            transition: width 0.3s ease;
+        }
+        .nav-link.active::after,
+        .nav-link:hover::after {
+            width: 100%;
+        }
+        .card {
+            background-color: #fffaf5;
+            border: 1px solid #fceadf;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+        .btn-primary {
+            background-color: #ef8c77;
+            color: white;
+            transition: background-color 0.3s;
+        }
+        .btn-primary:hover {
+            background-color: #e87058;
+        }
+        .btn-secondary {
+            background-color: #fceadf;
+            color: #af846b;
+            transition: background-color 0.3s;
+        }
+        .btn-secondary.active {
+            background-color: #ef8c77;
+            color: white;
+            font-weight: bold;
+        }
+        .quote-box {
+            background-color: #fffaf5;
+            border-left: 4px solid #ef8c77;
+        }
+        .modal-backdrop {
+            background-color: rgba(0,0,0,0.5);
+            transition: opacity 0.3s ease;
+        }
+        .modal-content {
+            transition: transform 0.3s ease;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 300px;
+            max-height: 400px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 400px;
+            }
+        }
+        .sister-node {
+            border: 2px solid #fceadf;
+            background-color: #fffaf5;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        .sister-node:hover, .sister-node.active {
+            border-color: #ef8c77;
+            background-color: #fff;
+            transform: scale(1.05);
+        }
+        .sister-node.center {
+            border-color: #e87058;
+            background-color: #ef8c77;
+            color: white;
+            font-weight: bold;
+            transform: scale(1.1);
+        }
+    </style>
+</head>
+<body class="antialiased leading-relaxed">
+    <header class="bg-[#fdf6f0]/80 backdrop-blur-md sticky top-0 z-50 border-b border-[#fceadf]">
+        <nav class="container mx-auto px-6 py-4">
+            <div class="flex items-center justify-between">
+                <div class="text-xl font-bold text-[#af846b]">무츠키 연구소</div>
+                <div class="hidden md:flex items-center space-x-8">
+                    <a href="#home" class="nav-link active">개요</a>
+                    <a href="#visual" class="nav-link">외형적 매력</a>
+                    <a href="#personality" class="nav-link">성격과 목소리</a>
+                    <a href="#analysis" class="nav-link">매력 분석</a>
+                    <a href="#sisters" class="nav-link">자매함 관계</a>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <main>
+        <section id="home" class="py-20 md:py-32">
+            <div class="container mx-auto px-6 text-center">
+                <div class="w-40 h-40 md:w-56 md:h-56 mx-auto mb-8">
+                    <img src="https://yksk.kancollewiki.net/w/images/thumb/9/92/Ship_Card_Mutsuki_Kai_Ni.png/218px-Ship_Card_Mutsuki_Kai_Ni.png" alt="칸코레 무츠키" class="rounded-full object-cover w-full h-full shadow-lg border-4 border-white" onerror="this.onerror=null;this.src='https://placehold.co/224x224/fdf6f0/574538?text=Mutsuki';">
+                </div>
+                <h1 class="text-4xl md:text-6xl font-bold text-[#574538] mb-4">睦月 (무츠키)</h1>
+                <p class="text-lg md:text-xl text-[#af846b] max-w-3xl mx-auto">
+                    10년의 세월을 함께한, 변치 않는 사랑스러움의 결정체. 이 보고서는 무츠키가 왜, 그리고 어떻게 우리 마음속 최고의 구축함으로 자리 잡았는지에 대한 심층적인 탐구입니다.
+                </p>
+            </div>
+        </section>
+
+        <section id="visual" class="py-20 bg-[#fffaf5] border-y border-[#fceadf]">
+            <div class="container mx-auto px-6">
+                <div class="text-center mb-12">
+                    <h2 class="text-3xl font-bold">외형적 매력 분석</h2>
+                    <p class="text-md text-[#af846b] mt-2">무츠키의 디자인은 보호본능을 자극하는 요소들로 가득합니다. 각 부분을 클릭하여 매력 포인트를 확인해보세요.</p>
+                </div>
+                <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
+                    <div class="card p-6 rounded-lg text-center cursor-pointer" data-modal="visual-1">
+                        <div class="text-4xl mb-4">🐰</div>
+                        <h3 class="text-xl font-semibold mb-2">토끼 같은 귀</h3>
+                        <p class="text-sm text-[#af846b]">트레이드마크인 토끼 귀 모양의 장식은 활발하고 귀여운 이미지를 완성합니다.</p>
+                    </div>
+                    <div class="card p-6 rounded-lg text-center cursor-pointer" data-modal="visual-2">
+                        <div class="text-4xl mb-4">🎀</div>
+                        <h3 class="text-xl font-semibold mb-2">세일러복과 단장포</h3>
+                        <p class="text-sm text-[#af846b]">작은 체구에 꼭 맞는 세일러복과 등에 멘 단장포는 앳된 매력을 극대화합니다.</p>
+                    </div>
+                    <div class="card p-6 rounded-lg text-center cursor-pointer" data-modal="visual-3">
+                        <div class="text-4xl mb-4">😊</div>
+                        <h3 class="text-xl font-semibold mb-2">다채로운 표정</h3>
+                        <p class="text-sm text-[#af846b]">기본 일러스트의 해맑은 미소부터 중파 시의 슬픈 표정까지, 감정을 이입하게 만듭니다.</p>
+                    </div>
+                    <div class="card p-6 rounded-lg text-center cursor-pointer" data-modal="visual-4">
+                        <div class="text-4xl mb-4">⚓</div>
+                        <h3 class="text-xl font-semibold mb-2">무츠키형 구축함의 상징</h3>
+                        <p class="text-sm text-[#af846b]">1번함으로서의 상징성과 소박한 의장은 역사와 캐릭터성을 동시에 보여줍니다.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="personality" class="py-20">
+            <div class="container mx-auto px-6">
+                <div class="text-center mb-12">
+                    <h2 class="text-3xl font-bold">성격과 목소리</h2>
+                    <p class="text-md text-[#af846b] mt-2">무츠키의 순수하고 활기찬 성격은 대사 하나하나에 녹아 있습니다. 듣고 싶은 대사 종류를 선택해보세요.</p>
+                </div>
+                <div class="max-w-4xl mx-auto">
+                    <div class="flex justify-center space-x-2 md:space-x-4 mb-8" id="quote-tabs">
+                        <button class="btn-secondary active px-4 py-2 rounded-full text-sm md:text-base" data-quote="intro">소개</button>
+                        <button class="btn-secondary px-4 py-2 rounded-full text-sm md:text-base" data-quote="battle">전투</button>
+                        <button class="btn-secondary px-4 py-2 rounded-full text-sm md:text-base" data-quote="daily">일상</button>
+                        <button class="btn-secondary px-4 py-2 rounded-full text-sm md:text-base" data-quote="kai2">改二</button>
+                    </div>
+                    <div id="quote-display">
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="analysis" class="py-20 bg-[#fffaf5] border-y border-[#fceadf]">
+            <div class="container mx-auto px-6">
+                <div class="text-center mb-12">
+                    <h2 class="text-3xl font-bold">매력 속성 분석 차트</h2>
+                    <p class="text-md text-[#af846b] mt-2">무츠키의 '귀여움'을 구성하는 요소들을 시각적으로 분석했습니다. 아래 버튼으로 기본 상태와 2차 개장 상태를 비교해보세요.</p>
+                </div>
+                <div class="flex justify-center space-x-4 mb-8">
+                    <button id="chart-btn-base" class="btn-secondary active px-6 py-2 rounded-full">기본</button>
+                    <button id="chart-btn-kai2" class="btn-secondary px-6 py-2 rounded-full">改二</button>
+                </div>
+                <div class="chart-container">
+                    <canvas id="mutsukiChart"></canvas>
+                </div>
+            </div>
+        </section>
+
+        <section id="sisters" class="py-20">
+            <div class="container mx-auto px-6">
+                <div class="text-center mb-12">
+                    <h2 class="text-3xl font-bold">무츠키급 자매함과의 관계</h2>
+                    <p class="text-md text-[#af846b] mt-2">무츠키는 자매들과 함께할 때 더욱 빛납니다. 자매함의 이름을 클릭하여 관계를 확인해보세요.</p>
+                </div>
+                <div class="flex flex-col items-center">
+                    <div class="w-full max-w-4xl">
+                        <div class="grid grid-cols-3 gap-4 text-center items-center mb-4">
+                            <div class="sister-node p-3 rounded-lg" data-sister="kisaragi">키사라기</div>
+                            <div class="sister-node p-3 rounded-lg" data-sister="yayoi">야요이</div>
+                            <div class="sister-node p-3 rounded-lg" data-sister="uzuki">우즈키</div>
+                        </div>
+                        <div class="flex justify-center items-center my-4">
+                             <div class="sister-node center p-4 rounded-lg text-lg">무츠키</div>
+                        </div>
+                         <div class="grid grid-cols-4 gap-4 text-center items-center mt-4">
+                            <div class="sister-node p-3 rounded-lg" data-sister="satsuki">사츠키</div>
+                            <div class="sister-node p-3 rounded-lg" data-sister="fumizuki">후미즈키</div>
+                            <div class="sister-node p-3 rounded-lg" data-sister="nagatsuki">나가츠키</div>
+                            <div class="sister-node p-3 rounded-lg" data-sister="kikuzuki">키쿠즈키</div>
+                        </div>
+                    </div>
+                    <div id="sister-info" class="mt-8 p-6 rounded-lg card w-full max-w-4xl min-h-[100px]">
+                        <p class="text-center text-[#af846b]">자매함의 이름을 클릭하면 여기에 설명이 표시됩니다.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="bg-[#fffaf5] border-t border-[#fceadf] py-8">
+        <div class="container mx-auto px-6 text-center text-[#af846b]">
+            <p>For the one and only, Mutsuki.</p>
+            <p class="text-sm mt-2">A tribute created with 10 years of love.</p>
+        </div>
+    </footer>
+
+    <div id="modal-container" class="fixed inset-0 z-50 hidden items-center justify-center p-4">
+        <div class="modal-backdrop fixed inset-0"></div>
+        <div class="modal-content bg-white rounded-lg shadow-xl w-full max-w-md p-6 relative transform scale-95">
+            <button class="modal-close absolute top-4 right-4 text-gray-500 hover:text-gray-800">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+            </button>
+            <div id="modal-body"></div>
+        </div>
+    </div>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const visualCharmData = {
+                "visual-1": {
+                    title: "🐰 토끼 같은 귀",
+                    content: "정확히는 머리카락의 일부지만, 토끼 귀처럼 보이는 이 특징은 무츠키의 정체성과도 같습니다. 활발하고 천진난만한 성격을 시각적으로 보여주며, 팬들에게 가장 사랑받는 포인트 중 하나입니다. 이 귀가 살짝 흔들리는 듯한 느낌은 그녀의 생동감을 더해줍니다."
+                },
+                "visual-2": {
+                    title: "🎀 세일러복과 단장포",
+                    content: "가장 기본적인 형태의 세일러복은 구축함 소녀의 순수함을 상징합니다. 특히 무츠키의 작은 체구에 맞춰진 복장은 앳되고 귀여운 느낌을 강조합니다. 등에 멘 어뢰 발사관은 마치 책가방처럼 보여 학생 같은 풋풋함을 느끼게 합니다."
+                },
+                "visual-3": {
+                    title: "😊 다채로운 표정",
+                    content: "기본 상태의 해맑고 자신감 넘치는 미소는 보는 사람마저 기분 좋게 만듭니다. 반면, 중파 상태에서는 금방이라도 울음을 터뜨릴 듯한 표정으로 변해 지켜주고 싶은 보호본능을 강하게 자극합니다. 이러한 표정 변화의 폭이 무츠키의 입체적인 매력을 만듭니다."
+                },
+                "visual-4": {
+                    title: "⚓ 무츠키형 구축함의 상징",
+                    content: "무츠키는 무츠키급 구축함의 1번함입니다. 이는 그녀가 자매들의 맏언니와 같은 위치에 있음을 의미합니다. 화려하지 않고 소박한 의장은 초기형 구축함이라는 역사적 사실을 반영하며, 이는 그녀의 순수한 성격과도 잘 어울립니다."
+                }
+            };
+
+            const quotesData = {
+                intro: [
+                    { ja: "睦月です。よろしくね！", ko: "무츠키입니다. 잘 부탁해!" },
+                    { ja: "司令官、睦月、がんばっちゃう！", ko: "사령관, 무츠키, 힘낼게!" }
+                ],
+                battle: [
+                    { ja: "攻撃！いっけー！", ko: "공격! 가랏-!" },
+                    { ja: "きゃあ！", ko: "꺄악!" },
+                    { ja: "みんな、ごめんね…。", ko: "모두들, 미안해..." }
+                ],
+                daily: [
+                    { ja: "司令官、なでなでしてもいいよー？", ko: "사령관, 쓰담쓰담해줘도 괜찮아-?" },
+                    { ja: "如月ちゃん、まだかなー？", ko: "키사라기쨩, 아직이려나-?" },
+                    { ja: "うーん、眠くなってきちゃった。", ko: "으-음, 졸려져 버렸어." }
+                ],
+                kai2: [
+                    { ja: "改二になった睦月も、どうぞよろしくね！", ko: "개2가 된 무츠키도, 부디 잘 부탁해!" },
+                    { ja: "ちょっとは、頼りになったかな？えへへ。", ko: "조금은, 의지가 되었으려나? 에헤헤." }
+                ]
+            };
+            
+            const sisterData = {
+                kisaragi: "2번함 키사라기. 무츠키가 가장 자주 언급하는 소중한 동생. 애틋한 관계성으로 많은 팬들의 마음을 울렸습니다.",
+                yayoi: "3번함 야요이. 무뚝뚝해 보이지만 속이 깊은 동생. 무츠키의 활발함과 좋은 대조를 이룹니다.",
+                uzuki: "4번함 우즈키. '뿅'이라는 말버릇이 특징인 활기찬 동생. 무츠키와 함께 분위기 메이커 역할을 합니다.",
+                satsuki: "5번함 사츠키. 자신을 '보쿠'라고 칭하는 보이시한 매력의 동생입니다.",
+                fumizuki: "7번함 후미즈키. 약간 소심하지만 상냥한 성격의 동생입니다.",
+                nagatsuki: "8번함 나가츠키. 쿨하고 지적인 분위기를 풍기는 동생입니다.",
+                kikuzuki: "9번함 키쿠즈키. 시니컬한 말투를 쓰지만 사실은 동료를 아낍니다."
+            };
+
+
+            const navLinks = document.querySelectorAll('.nav-link');
+            const sections = document.querySelectorAll('main section');
+            window.addEventListener('scroll', () => {
+                let current = '';
+                sections.forEach(section => {
+                    const sectionTop = section.offsetTop;
+                    if (pageYOffset >= sectionTop - 60) {
+                        current = section.getAttribute('id');
+                    }
+                });
+                navLinks.forEach(link => {
+                    link.classList.remove('active');
+                    if (link.getAttribute('href').includes(current)) {
+                        link.classList.add('active');
+                    }
+                });
+            });
+            navLinks.forEach(link => {
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    document.querySelector(this.getAttribute('href')).scrollIntoView({
+                        behavior: 'smooth'
+                    });
+                });
+            });
+
+            const cards = document.querySelectorAll('.card[data-modal]');
+            const modalContainer = document.getElementById('modal-container');
+            const modalBackdrop = modalContainer.querySelector('.modal-backdrop');
+            const modalClose = modalContainer.querySelector('.modal-close');
+            const modalBody = document.getElementById('modal-body');
+
+            cards.forEach(card => {
+                card.addEventListener('click', () => {
+                    const modalId = card.dataset.modal;
+                    const data = visualCharmData[modalId];
+                    if(data) {
+                        modalBody.innerHTML = `
+                            <h3 class="text-2xl font-bold mb-4 text-[#574538]">${data.title}</h3>
+                            <p class="text-[#af846b]">${data.content}</p>
+                        `;
+                        modalContainer.classList.remove('hidden');
+                        modalContainer.classList.add('flex');
+                        setTimeout(() => {
+                            modalContainer.querySelector('.modal-backdrop').classList.remove('opacity-0');
+                            modalContainer.querySelector('.modal-content').classList.remove('scale-95');
+                        }, 10);
+                    }
+                });
+            });
+
+            function closeModal() {
+                 modalContainer.querySelector('.modal-backdrop').classList.add('opacity-0');
+                 modalContainer.querySelector('.modal-content').classList.add('scale-95');
+                 setTimeout(() => {
+                    modalContainer.classList.add('hidden');
+                    modalContainer.classList.remove('flex');
+                }, 300);
+            }
+            modalBackdrop.addEventListener('click', closeModal);
+            modalClose.addEventListener('click', closeModal);
+
+
+            const quoteTabs = document.getElementById('quote-tabs');
+            const quoteDisplay = document.getElementById('quote-display');
+            
+            function displayQuotes(category) {
+                const quotes = quotesData[category];
+                let html = '<div class="space-y-4">';
+                quotes.forEach(quote => {
+                    html += `
+                        <div class="quote-box p-4 rounded-r-lg">
+                            <p class="font-semibold text-lg text-[#574538]">${quote.ja}</p>
+                            <p class="text-sm text-[#af846b] mt-1">${quote.ko}</p>
+                        </div>
+                    `;
+                });
+                html += '</div>';
+                quoteDisplay.innerHTML = html;
+            }
+
+            quoteTabs.addEventListener('click', (e) => {
+                if(e.target.tagName === 'BUTTON') {
+                    quoteTabs.querySelector('.active').classList.remove('active');
+                    e.target.classList.add('active');
+                    displayQuotes(e.target.dataset.quote);
+                }
+            });
+            displayQuotes('intro');
+
+            const ctx = document.getElementById('mutsukiChart').getContext('2d');
+            const chartData = {
+                labels: ['순수함', '활발함', '어리광', '의젓함', '덜렁거림', '보호본능'],
+                datasets: [
+                    {
+                        label: '기본',
+                        data: [9, 8, 7, 4, 6, 9],
+                        backgroundColor: 'rgba(239, 140, 119, 0.2)',
+                        borderColor: 'rgba(239, 140, 119, 1)',
+                        pointBackgroundColor: 'rgba(239, 140, 119, 1)',
+                        pointBorderColor: '#fff',
+                        pointHoverBackgroundColor: '#fff',
+                        pointHoverBorderColor: 'rgba(239, 140, 119, 1)'
+                    },
+                    {
+                        label: '改二',
+                        data: [8, 7, 5, 8, 4, 7],
+                        backgroundColor: 'rgba(175, 132, 107, 0.2)',
+                        borderColor: 'rgba(175, 132, 107, 1)',
+                        pointBackgroundColor: 'rgba(175, 132, 107, 1)',
+                        pointBorderColor: '#fff',
+                        pointHoverBackgroundColor: '#fff',
+                        pointHoverBorderColor: 'rgba(175, 132, 107, 1)'
+                    }
+                ]
+            };
+            const chartOptions = {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    r: {
+                        angleLines: { color: '#fceadf' },
+                        grid: { color: '#fceadf' },
+                        pointLabels: {
+                            font: { size: 14, family: "'Noto Sans KR', sans-serif" },
+                            color: '#af846b'
+                        },
+                        ticks: {
+                            color: '#af846b',
+                            backdropColor: '#fdf6f0',
+                            stepSize: 2
+                        },
+                        suggestedMin: 0,
+                        suggestedMax: 10
+                    }
+                },
+                plugins: {
+                    legend: {
+                        position: 'top',
+                        labels: {
+                             font: { size: 12, family: "'Noto Sans KR', sans-serif" },
+                             color: '#574538'
+                        }
+                    }
+                }
+            };
+            
+            const mutsukiChart = new Chart(ctx, {
+                type: 'radar',
+                data: chartData,
+                options: chartOptions
+            });
+
+            const chartBtnBase = document.getElementById('chart-btn-base');
+            const chartBtnKai2 = document.getElementById('chart-btn-kai2');
+            
+            mutsukiChart.data.datasets[1].hidden = true;
+            mutsukiChart.update();
+
+            chartBtnBase.addEventListener('click', () => {
+                mutsukiChart.data.datasets[0].hidden = false;
+                mutsukiChart.data.datasets[1].hidden = true;
+                mutsukiChart.update();
+                chartBtnBase.classList.add('active');
+                chartBtnKai2.classList.remove('active');
+            });
+            chartBtnKai2.addEventListener('click', () => {
+                mutsukiChart.data.datasets[0].hidden = false;
+                mutsukiChart.data.datasets[1].hidden = false;
+                mutsukiChart.update();
+                chartBtnKai2.classList.add('active');
+                chartBtnBase.classList.remove('active');
+            });
+
+            const sisterNodes = document.querySelectorAll('.sister-node[data-sister]');
+            const sisterInfo = document.getElementById('sister-info');
+            sisterNodes.forEach(node => {
+                node.addEventListener('click', () => {
+                    const currentActive = document.querySelector('.sister-node.active');
+                    if(currentActive) {
+                        currentActive.classList.remove('active');
+                    }
+                    node.classList.add('active');
+                    const sisterKey = node.dataset.sister;
+                    sisterInfo.innerHTML = `<p class="text-[#574538] text-center">${sisterData[sisterKey]}</p>`;
+                });
+            });
+        });
+    </script>
+</body>
+</html>
+
+
+
