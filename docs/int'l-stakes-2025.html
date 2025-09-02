@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>2025 인터내셔널 스테이크스 분석: 예측과 결과</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        html {
+            scroll-behavior: smooth;
+        }
+        body {
+            font-family: 'Noto Sans KR', sans-serif;
+            background-color: #FDFBF8; /* Off-white */
+            color: #4A4A4A; /* Dark Gray */
+        }
+       .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 450px; /* Increased height for 6 bars */
+            max-height: 60vh;
+        }
+        @media (min-width: 768px) {
+           .chart-container {
+                height: 500px;
+            }
+        }
+       .nav-link {
+            transition: color 0.3s, border-bottom-color 0.3s;
+            border-bottom: 2px solid transparent;
+        }
+       .nav-link:hover {
+            color: #4C1D95; /* Deep Indigo */
+            border-bottom-color: #4C1D95;
+        }
+       .accordion-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.5s ease-out;
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <header class="bg-white/80 backdrop-blur-md sticky top-0 z-50 shadow-sm">
+        <nav class="container mx-auto px-6 py-4 flex justify-between items-center">
+            <h1 class="text-xl md:text-2xl font-bold text-indigo-800">2025 인터내셔널 스테이크스</h1>
+            <div class="hidden md:flex space-x-8">
+                <a href="#overview" class="nav-link text-gray-600 font-semibold pb-1">개요</a>
+                <a href="#contenders" class="nav-link text-gray-600 font-semibold pb-1">주요 출전마</a>
+                <a href="#results" class="nav-link text-gray-600 font-semibold pb-1">경주 분석</a>
+                <a href="#analysis" class="nav-link text-gray-600 font-semibold pb-1">심층 분석</a>
+            </div>
+             <button id="mobile-menu-button" class="md:hidden focus:outline-none">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path></svg>
+            </button>
+        </nav>
+        <div id="mobile-menu" class="hidden md:hidden bg-white px-6 pb-4">
+            <a href="#overview" class="block py-2 text-gray-600">개요</a>
+            <a href="#contenders" class="block py-2 text-gray-600">주요 출전마</a>
+            <a href="#results" class="block py-2 text-gray-600">경주 분석</a>
+            <a href="#analysis" class="block py-2 text-gray-600">심층 분석</a>
+        </div>
+    </header>
+
+    <main class="container mx-auto px-6 py-12">
+        <section id="overview" class="text-center scroll-mt-20">
+            <h2 class="text-4xl md:text-5xl font-bold text-gray-800 mb-4">Knavesmire의 대관식: 예측과 결과</h2>
+            <p class="max-w-3xl mx-auto text-lg text-gray-600 mb-12">
+                2025년 주드몬테 인터내셔널 스테이크스는 단순한 경주를 넘어, 치밀한 전략과 예측 불가능한 드라마가 결합된 한 편의 서사시였습니다. '옴부즈맨'과 '델라크루아'의 재대결에 모든 관심이 쏠렸지만, 경주의 진정한 주인공은 대담한 페이스메이커 '비르 캐슬'이 만들어낸 극적인 전개였습니다. 결국 '옴부즈맨'이 압도적인 승리를 거두며 중거리 최강자임을 증명했지만, 그 과정은 현대 경마 역사상 가장 기억에 남을 명장면으로 기록될 것입니다.
+            </p>
+
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-6 max-w-4xl mx-auto text-left">
+                <div class="bg-white p-6 rounded-xl shadow-lg border border-gray-200/50">
+                    <h3 class="text-sm font-bold text-indigo-600 mb-2">🏆 우승마</h3>
+                    <p class="text-xl font-bold text-gray-800">Ombudsman</p>
+                </div>
+                <div class="bg-white p-6 rounded-xl shadow-lg border border-gray-200/50">
+                    <h3 class="text-sm font-bold text-indigo-600 mb-2">🏇 기수</h3>
+                    <p class="text-xl font-bold text-gray-800">William Buick</p>
+                </div>
+                <div class="bg-white p-6 rounded-xl shadow-lg border border-gray-200/50">
+                    <h3 class="text-sm font-bold text-indigo-600 mb-2">👨‍🏫 조교사</h3>
+                    <p class="text-xl font-bold text-gray-800">J & T Gosden</p>
+                </div>
+                <div class="bg-white p-6 rounded-xl shadow-lg border border-gray-200/50">
+                    <h3 class="text-sm font-bold text-indigo-600 mb-2">🗓️ 경주일</h3>
+                    <p class="text-xl font-bold text-gray-800">2025년 8월 20일</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="contenders" class="my-20 scroll-mt-20">
+            <h2 class="text-3xl font-bold text-center text-gray-800 mb-4">출전마: 라이벌과 변수</h2>
+            <p class="max-w-3xl mx-auto text-center text-lg text-gray-600 mb-12">
+                경주는 '옴부즈맨'과 '델라크루아'의 재대결 구도였지만, 강력한 해외 원정마와 전략적 페이스메이커의 존재가 예측을 더욱 흥미롭게 만들었습니다. 각 진영의 전략과 기대치를 확인해 보세요.
+            </p>
+            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <div class="bg-white p-6 rounded-xl shadow-lg border border-gray-200/50 transform hover:-translate-y-2 transition-transform duration-300">
+                    <h3 class="text-2xl font-bold text-gray-800">Ombudsman</h3>
+                    <p class="text-gray-500 mb-4">설욕을 노리는 챔피언</p>
+                    <div class="bg-indigo-100 text-indigo-800 text-lg font-bold px-4 py-2 rounded-full inline-block">배당률: 7/4F</div>
+                </div>
+                <div class="bg-white p-6 rounded-xl shadow-lg border border-gray-200/50 transform hover:-translate-y-2 transition-transform duration-300">
+                    <h3 class="text-2xl font-bold text-gray-800">Delacroix</h3>
+                    <p class="text-gray-500 mb-4">이클립스의 승자</p>
+                    <div class="bg-green-100 text-green-800 text-lg font-bold px-4 py-2 rounded-full inline-block">배당률: 9/4</div>
+                </div>
+                 <div class="bg-white p-6 rounded-xl shadow-lg border border-gray-200/50 transform hover:-translate-y-2 transition-transform duration-300">
+                    <h3 class="text-2xl font-bold text-gray-800">Danon Decile</h3>
+                    <p class="text-gray-500 mb-4">강력한 해외 원정마</p>
+                    <div class="bg-red-100 text-red-800 text-lg font-bold px-4 py-2 rounded-full inline-block">배당률: 7/2</div>
+                </div>
+                <div class="bg-white p-6 rounded-xl shadow-lg border border-gray-200/50 transform hover:-translate-y-2 transition-transform duration-300">
+                    <h3 class="text-2xl font-bold text-gray-800">See The Fire</h3>
+                    <p class="text-gray-500 mb-4">코스 전문가</p>
+                    <div class="bg-blue-100 text-blue-800 text-lg font-bold px-4 py-2 rounded-full inline-block">배당률: 7/1</div>
+                </div>
+                <div class="bg-white p-6 rounded-xl shadow-lg border border-gray-200/50 transform hover:-translate-y-2 transition-transform duration-300">
+                    <h3 class="text-2xl font-bold text-gray-800">Daryz</h3>
+                    <p class="text-gray-500 mb-4">무패의 다크호스</p>
+                    <div class="bg-yellow-100 text-yellow-800 text-lg font-bold px-4 py-2 rounded-full inline-block">배당률: 14/1</div>
+                </div>
+                <div class="bg-white p-6 rounded-xl shadow-lg border border-gray-200/50 transform hover:-translate-y-2 transition-transform duration-300">
+                    <h3 class="text-2xl font-bold text-gray-800">Birr Castle</h3>
+                    <p class="text-gray-500 mb-4">전략적 페이스메이커</p>
+                    <div class="bg-gray-100 text-gray-800 text-lg font-bold px-4 py-2 rounded-full inline-block">배당률: 150/1</div>
+                </div>
+            </div>
+        </section>
+
+        <section id="results" class="my-20 scroll-mt-20">
+            <h2 class="text-3xl font-bold text-center text-gray-800 mb-4">경주 결과 및 시각적 분석</h2>
+            <p class="max-w-3xl mx-auto text-center text-lg text-gray-600 mb-12">
+                '옴부즈맨'이 완벽한 승리를 거두었지만, 경주의 진정한 놀라움은 150/1 배당률의 '비르 캐슬'이 3위를 차지한 것입니다. 예측 배당률과 실제 순위를 비교하여 경주의 드라마를 시각적으로 확인해 보세요.
+            </p>
+            <div class="grid lg:grid-cols-5 gap-8 items-start">
+                <div class="lg:col-span-2 bg-white p-6 rounded-xl shadow-lg border border-gray-200/50">
+                    <h3 class="text-2xl font-bold text-gray-800 mb-4">최종 순위 (Top 3)</h3>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left">
+                            <thead>
+                                <tr class="border-b">
+                                    <th class="py-2 px-4 font-bold text-indigo-700">순위</th>
+                                    <th class="py-2 px-4 font-bold text-indigo-700">경주마</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr class="border-b">
+                                    <td class="py-3 px-4 text-lg font-bold">1위</td>
+                                    <td class="py-3 px-4">Ombudsman</td>
+                                </tr>
+                                <tr class="border-b">
+                                    <td class="py-3 px-4 text-lg font-bold">2위</td>
+                                    <td class="py-3 px-4">Delacroix</td>
+                                </tr>
+                                <tr>
+                                    <td class="py-3 px-4 text-lg font-bold">3위</td>
+                                    <td class="py-3 px-4">Birr Castle</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="lg:col-span-3 bg-white p-6 rounded-xl shadow-lg border border-gray-200/50">
+                     <h3 class="text-2xl font-bold text-gray-800 mb-4 text-center">배당률 대비 최종 순위</h3>
+                    <div class="chart-container">
+                        <canvas id="resultsChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="analysis" class="my-20 scroll-mt-20">
+            <h2 class="text-3xl font-bold text-center text-gray-800 mb-4">전문가 심층 분석</h2>
+             <p class="max-w-3xl mx-auto text-center text-lg text-gray-600 mb-12">
+                이번 경주는 단순한 순위 이상의 분석 포인트를 남겼습니다. '옴부즈맨'의 승리 뒤에 숨겨진 전략, '비르 캐슬'이 만들어낸 이변, 그리고 다른 경쟁자들의 성과를 자세히 살펴보세요.
+            </p>
+            <div id="accordion" class="space-y-4 max-w-3xl mx-auto">
+                <div class="bg-white rounded-xl shadow-lg border border-gray-200/50 overflow-hidden">
+                    <button class="accordion-header w-full flex justify-between items-center p-6 text-left font-bold text-lg text-gray-800">
+                        <span>옴부즈맨의 완벽한 전략적 승리</span>
+                        <span class="accordion-icon transition-transform duration-300 transform">+</span>
+                    </button>
+                    <div class="accordion-content">
+                        <p class="p-6 pt-0 text-gray-600">
+                            '옴부즈맨'의 승리는 고돌핀 팀의 전략이 완벽하게 성공했음을 증명합니다. 페이스메이커 '비르 캐슬'이 만든 정직하고 빠른 페이스는 '옴부즈맨'의 최대 강점인 지구력을 극대화했습니다. 이는 이전 경주였던 이클립스에서 '델라크루아'가 활용했던 순간적인 스피드를 완전히 무력화시키는 결정적인 요인이었습니다.
+                        </p>
+                    </div>
+                </div>
+                 <div class="bg-white rounded-xl shadow-lg border border-gray-200/50 overflow-hidden">
+                    <button class="accordion-header w-full flex justify-between items-center p-6 text-left font-bold text-lg text-gray-800">
+                        <span>역사에 남을 페이스메이커, 비르 캐슬</span>
+                        <span class="accordion-icon transition-transform duration-300 transform">+</span>
+                    </button>
+                    <div class="accordion-content">
+                        <p class="p-6 pt-0 text-gray-600">
+                            '비르 캐슬'의 경주는 단순한 페이스메이킹을 넘어, 경주 자체를 지배할 뻔한 영웅적인 질주였습니다. 한때 25마신(약 60m)까지 달아나며 대이변을 예고했고, 실시간 베팅 배당률이 2/1까지 떨어지는 기현상을 낳았습니다. 그의 영웅적인 3위는 경주의 가장 극적인 순간으로 기억될 것입니다.
+                        </p>
+                    </div>
+                </div>
+                 <div class="bg-white rounded-xl shadow-lg border border-gray-200/50 overflow-hidden">
+                    <button class="accordion-header w-full flex justify-between items-center p-6 text-left font-bold text-lg text-gray-800">
+                        <span>경쟁자들의 희비</span>
+                        <span class="accordion-icon transition-transform duration-300 transform">+</span>
+                    </button>
+                    <div class="accordion-content">
+                        <p class="p-6 pt-0 text-gray-600">
+                            '델라크루아'는 최선을 다했지만, 빠른 페이스 속에서 '옴부즈맨'의 압도적인 지구력에 미치지 못하며 2위를 기록했습니다. 한편, 큰 기대를 모았던 일본의 '다논 데실'과 프랑스의 '다리즈'는 이례적인 경주 흐름에 휘말려 제 기량을 발휘하지 못하고 하위권에 머무르며 아쉬움을 남겼습니다.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <footer class="bg-gray-800 text-white mt-20">
+        <div class="container mx-auto px-6 py-8 text-center">
+            <p>&copy; 2025 경마 데이터 분석. 모든 권리 보유.</p>
+            <p class="text-sm text-gray-400 mt-2">이 분석은 공개된 데이터를 기반으로 작성되었습니다.</p>
+        </div>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const mobileMenuButton = document.getElementById('mobile-menu-button');
+            const mobileMenu = document.getElementById('mobile-menu');
+
+            mobileMenuButton.addEventListener('click', () => {
+                mobileMenu.classList.toggle('hidden');
+            });
+            
+            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+                anchor.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    if (mobileMenu.classList.contains('hidden') === false) {
+                        mobileMenu.classList.add('hidden');
+                    }
+                    
+                    const targetId = this.getAttribute('href');
+                    const targetElement = document.querySelector(targetId);
+                    if(targetElement) {
+                        targetElement.scrollIntoView({
+                            behavior: 'smooth'
+                        });
+                    }
+                });
+            });
+
+            const accordionHeaders = document.querySelectorAll('.accordion-header');
+            accordionHeaders.forEach(header => {
+                header.addEventListener('click', () => {
+                    const content = header.nextElementSibling;
+                    const icon = header.querySelector('.accordion-icon');
+                    
+                    if (content.style.maxHeight) {
+                        content.style.maxHeight = null;
+                        icon.textContent = '+';
+                    } else {
+                        document.querySelectorAll('.accordion-content').forEach(c => c.style.maxHeight = null);
+                        document.querySelectorAll('.accordion-icon').forEach(i => i.textContent = '+');
+                        content.style.maxHeight = content.scrollHeight + "px";
+                        icon.textContent = '-';
+                    }
+                });
+            });
+
+            const ctx = document.getElementById('resultsChart').getContext('2d');
+            const horseData = [
+                { name: 'Ombudsman', rank: 1, odds: '7/4F' },
+                { name: 'Delacroix', rank: 2, odds: '9/4' },
+                { name: 'Birr Castle', rank: 3, odds: '150/1' },
+                { name: 'See The Fire', rank: 4, odds: '7/1' },
+                { name: 'Danon Decile', rank: 5, odds: '7/2' },
+                { name: 'Daryz', rank: 6, odds: '14/1' },
+            ];
+
+            horseData.sort((a, b) => a.rank - b.rank);
+            
+            const labels = horseData.map(h => h.name);
+            const data = horseData.map(h => h.rank);
+            const odds = horseData.map(h => h.odds);
+
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: '최종 순위',
+                        data: data,
+                        backgroundColor: [
+                            'rgba(76, 29, 149, 0.6)',
+                            'rgba(5, 150, 105, 0.6)',
+                            'rgba(107, 114, 128, 0.6)',
+                            'rgba(37, 99, 235, 0.6)',
+                            'rgba(220, 38, 38, 0.6)',
+                            'rgba(217, 119, 6, 0.6)',
+                        ],
+                        borderColor: [
+                            'rgba(76, 29, 149, 1)',
+                            'rgba(5, 150, 105, 1)',
+                            'rgba(107, 114, 128, 1)',
+                            'rgba(37, 99, 235, 1)',
+                            'rgba(220, 38, 38, 1)',
+                            'rgba(217, 119, 6, 1)',
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    indexAxis: 'y',
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        x: {
+                            beginAtZero: true,
+                            reverse: true,
+                            title: {
+                                display: true,
+                                text: '순위 (낮을수록 높음)'
+                            },
+                             ticks: {
+                                stepSize: 1,
+                                callback: function(value) {
+                                    if (value > 0) return value + '위';
+                                    return value;
+                                }
+                            }
+                        },
+                        y: {
+                           ticks: {
+                                autoSkip: false
+                           }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    let label = context.dataset.label || '';
+                                    if (label) {
+                                        label += ': ';
+                                    }
+                                    label += context.raw + '위';
+                                    return label;
+                                },
+                                afterLabel: function(context) {
+                                    return '시작 배당률: ' + odds[context.dataIndex];
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        });
+    </script>
+</body>
+</html>
