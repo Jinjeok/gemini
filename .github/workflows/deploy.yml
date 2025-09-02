@@ -5,9 +5,8 @@ name: Build and Deploy to GitHub Pages
 on:
   push:
     branches:
-      - main # main 브랜치에 푸시될 때마다 실행
+      - main
 
-# 동시성 설정: 동일한 그룹의 워크플로우가 여러 개 실행될 때 이전 실행을 취소하고 마지막 것만 실행
 concurrency:
   group: "pages"
   cancel-in-progress: true
@@ -18,6 +17,11 @@ jobs:
   # --------------------
   build:
     runs-on: ubuntu-latest
+    # build 잡에 커밋을 위한 권한 추가
+    permissions:
+      contents: write # 레포지토리에 커밋하기 위한 권한
+      pages: write      # GitHub Pages 아티팩트를 업로드하기 위한 권한
+      id-token: write   # 인증을 위한 권한
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -28,7 +32,22 @@ jobs:
           node-version: '20'
 
       - name: Generate index.html
-        run: node generate-index.js # 스크립트를 실행해 빌드 결과물 생성
+        run: node generate-index.js
+
+      # --- 이 부분을 다시 추가 ---
+      - name: Commit and Push changes
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git add index.html
+          # 변경 사항이 있을 때만 커밋
+          if ! git diff --quiet && ! git diff --staged --quiet; then
+            git commit -m "Automated: Update index.html"
+            git push
+          else
+            echo "No changes to commit."
+          fi
+      # ------------------------
 
       - name: Setup Pages
         uses: actions/configure-pages@v5
@@ -36,27 +55,19 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          # 배포할 파일들이 있는 경로를 지정합니다.
-          # generate-index.js가 루트 폴더에 index.html을 만든다면 '.'가 맞습니다.
           path: '.'
 
   # --------------------
-  # 2. 배포(Deploy) 잡
+  # 2. 배포(Deploy) 잡 (여기는 수정할 필요 없음)
   # --------------------
   deploy:
-    # build 잡이 성공적으로 끝나야 실행됨
     needs: build
-
-    # 배포에 필요한 권한만 부여
     permissions:
       pages: write
       id-token: write
-
-    # 배포 환경 설정 (필수!)
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
-
     runs-on: ubuntu-latest
     steps:
       - name: Deploy to GitHub Pages
