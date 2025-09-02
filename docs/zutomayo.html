@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ZUTOMAYO: 종합 심층 분석 리포트</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Cool Neutrals & Muted Teal -->
+    <!-- Application Structure Plan: The application is a comprehensive, multi-faceted analysis. It includes five thematic sections: Intro, Sound Lab, Live Experience, Lyrical World, and Discography Explorer. The 'Lyrical World' section, a core component of their artistry, has been corrected based on user feedback. The navigation remains a sticky header for easy, non-linear exploration. This structure provides a holistic view, allowing users to delve into musical theory, performance art, and literary analysis within a single, cohesive interactive experience. -->
+    <!-- Visualization & Content Choices: 
+        1. Musical Elements Analysis: Report Info -> Analysis including Strings/Brass. Goal -> Compare the role and complexity of each instrument group. Viz/Method -> Interactive Doughnut Chart (Chart.js) + dynamic text. Interaction -> Buttons for each element update the chart/text. Justification -> Provides a rich, detailed breakdown of their complex arrangements.
+        2. Live Performance Structure: Report Info -> Expanded concert flow, including Encore. Goal -> Organize and explain the complete structure of their shows. Viz/Method -> Expanded interactive step-by-step diagram (HTML/CSS). Interaction -> Clicking each stage reveals its detailed description. Justification -> Maps out the entire emotional arc of a typical Zutomayo performance.
+        3. Lyrical World (Corrected): Report Info -> Common lyrical themes and unique vocabulary. Goal -> Analyze and categorize their lyrical content with accurate examples. Viz/Method -> Thematic buttons triggering text updates. Interaction -> Clicking themes like 'Time', 'Identity', 'Conflict' displays corrected, detailed analysis. Justification -> Dedicates a space for their cryptic but crucial lyrical component, making it digestible and factually accurate.
+        4. Discography Explorer: Report Info -> Analysis of more key songs. Goal -> Inform with a wider range of specific examples. Viz/Method -> Expanded interactive card grid. Interaction -> Clicking a card reveals an in-depth analysis. Justification -> Broadens the user's understanding of their musical evolution and versatility.
+        CONFIRMING NO SVG/Mermaid. -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Noto Sans KR', sans-serif;
+            background-color: #f8f9fa;
+            color: #212529;
+        }
+        .active-nav {
+            color: #10B981;
+            border-bottom: 2px solid #10B981;
+        }
+        .inactive-nav {
+            color: #4B5563;
+            border-bottom: 2px solid transparent;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 400px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 300px;
+            max-height: 350px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 350px;
+            }
+        }
+        .fade-in {
+            animation: fadeIn 0.5s ease-in-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .timeline-item.active {
+             border-color: #10B981;
+             background-color: #ECFDF5;
+        }
+        .song-card.active, .lyric-btn.active {
+            border-color: #10B981;
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            background-color: #ECFDF5;
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <header class="bg-white/80 backdrop-blur-md sticky top-0 z-50 shadow-sm">
+        <nav class="container mx-auto px-6 py-4 flex justify-between items-center">
+            <h1 class="text-xl font-bold text-gray-800">ZUTOMAYO 종합 분석</h1>
+            <div class="hidden md:flex space-x-6">
+                <a href="#intro" class="nav-link inactive-nav font-medium transition-colors duration-300 pb-1">소개</a>
+                <a href="#sound-lab" class="nav-link inactive-nav font-medium transition-colors duration-300 pb-1">사운드 분석</a>
+                <a href="#live" class="nav-link inactive-nav font-medium transition-colors duration-300 pb-1">라이브 퍼포먼스</a>
+                <a href="#lyrics" class="nav-link inactive-nav font-medium transition-colors duration-300 pb-1">가사 세계관</a>
+                <a href="#discography" class="nav-link inactive-nav font-medium transition-colors duration-300 pb-1">주요 곡 분석</a>
+            </div>
+        </nav>
+    </header>
+
+    <main class="container mx-auto px-6 py-12">
+
+        <section id="intro" class="text-center mb-24 min-h-[60vh] flex flex-col justify-center items-center">
+            <h2 class="text-4xl md:text-5xl font-bold text-gray-800 mb-4">ずっと真夜中でいいのに。</h2>
+            <p class="text-lg text-gray-600 mb-8 max-w-3xl">얼굴 없는 아티스트, ACAね(아카네)를 중심으로 한 음악 집단 '즛토마요'. 그들은 특정 장르에 얽매이지 않는 자유로운 음악, 철학적이고 문학적인 가사, 그리고 압도적인 라이브 퍼포먼스로 현대 J-POP 씬에 가장 신선한 충격을 던지고 있습니다. 본 리포트는 그들의 음악적 구성 요소부터 라이브의 치밀한 설계, 그리고 심오한 가사의 세계관까지, ZUTOMAYO의 모든 것을 입체적으로 해부합니다.</p>
+             <div class="w-24 h-1 bg-emerald-500 mx-auto"></div>
+        </section>
+
+        <section id="sound-lab" class="mb-24 scroll-mt-20">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl font-bold text-gray-800">사운드 실험실: ZUTOMAYO 해부</h2>
+                <p class="mt-4 text-gray-600 max-w-2xl mx-auto">ZUTOMAYO의 사운드는 복잡한 레이어가 정교하게 얽혀 만들어집니다. 아래 요소를 클릭하여 각 파트가 음악 전체에 기여하는 역할과 중요도를 시각화된 데이터와 상세한 분석으로 확인해보세요.</p>
+            </div>
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+                <div class="flex flex-col items-center">
+                    <div class="chart-container">
+                        <canvas id="soundChart"></canvas>
+                    </div>
+                    <div class="flex flex-wrap justify-center gap-3 mt-8">
+                        <button class="sound-btn bg-emerald-500 text-white px-4 py-2 rounded-full font-semibold shadow hover:bg-emerald-600 transition-all" data-element="vocals">ACAね 보컬</button>
+                        <button class="sound-btn bg-white text-gray-700 px-4 py-2 rounded-full font-semibold shadow hover:bg-gray-100 transition-all" data-element="bass">베이스 라인</button>
+                        <button class="sound-btn bg-white text-gray-700 px-4 py-2 rounded-full font-semibold shadow hover:bg-gray-100 transition-all" data-element="piano">피아노/키보드</button>
+                        <button class="sound-btn bg-white text-gray-700 px-4 py-2 rounded-full font-semibold shadow hover:bg-gray-100 transition-all" data-element="drums">드럼/리듬</button>
+                        <button class="sound-btn bg-white text-gray-700 px-4 py-2 rounded-full font-semibold shadow hover:bg-gray-100 transition-all" data-element="strings">스트링/브라스</button>
+                    </div>
+                </div>
+                <div id="analysis-content" class="bg-white p-8 rounded-lg shadow-lg min-h-[400px]">
+                    <h3 id="analysis-title" class="text-2xl font-bold text-gray-800 mb-4"></h3>
+                    <p id="analysis-text" class="text-gray-600 leading-relaxed"></p>
+                </div>
+            </div>
+        </section>
+
+        <section id="live" class="mb-24 scroll-mt-20">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl font-bold text-gray-800">라이브 퍼포먼스의 미학: 하나의 서사</h2>
+                <p class="mt-4 text-gray-600 max-w-2xl mx-auto">음원을 재현하는 것을 넘어, 한 편의 극적인 서사를 완성하는 ZUTOMAYO의 라이브. 독창적인 무대 연출과 음원을 초월하는 편곡이 결합된 그들의 공연 구성을 기승전결 구조로 심층 분석합니다.</p>
+            </div>
+            <div class="flex flex-col md:flex-row justify-center items-center gap-2 md:gap-0 relative">
+                <div class="timeline-item p-3 border-2 border-gray-300 rounded-lg cursor-pointer transition-all w-full md:w-auto text-center" data-stage="intro">
+                    <h4 class="font-bold">起 (기): 도입</h4></div>
+                <div class="w-full h-px md:w-6 md:h-px bg-gray-300"></div>
+                <div class="timeline-item p-3 border-2 border-gray-300 rounded-lg cursor-pointer transition-all w-full md:w-auto text-center" data-stage="main">
+                    <h4 class="font-bold">承 (승): 본편</h4></div>
+                <div class="w-full h-px md:w-6 md:h-px bg-gray-300"></div>
+                <div class="timeline-item p-3 border-2 border-gray-300 rounded-lg cursor-pointer transition-all w-full md:w-auto text-center" data-stage="jam">
+                    <h4 class="font-bold">轉 (전): 즉흥/변주</h4></div>
+                 <div class="w-full h-px md:w-6 md:h-px bg-gray-300"></div>
+                <div class="timeline-item p-3 border-2 border-gray-300 rounded-lg cursor-pointer transition-all w-full md:w-auto text-center" data-stage="climax">
+                    <h4 class="font-bold">結 (결): 클라이맥스</h4></div>
+                <div class="w-full h-px md:w-6 md:h-px bg-gray-300"></div>
+                <div class="timeline-item p-3 border-2 border-gray-300 rounded-lg cursor-pointer transition-all w-full md:w-auto text-center" data-stage="encore">
+                    <h4 class="font-bold">終 (종): 앙코르</h4></div>
+            </div>
+            <div id="live-analysis-content" class="mt-8 bg-white p-8 rounded-lg shadow-lg min-h-[250px] fade-in">
+                <p id="live-analysis-text" class="text-gray-600 leading-relaxed text-center">분석할 라이브 단계를 선택하세요.</p>
+            </div>
+        </section>
+
+        <section id="lyrics" class="mb-24 scroll-mt-20">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl font-bold text-gray-800">가사 세계관: 은유와 상징의 미로</h2>
+                <p class="mt-4 text-gray-600 max-w-2xl mx-auto">ZUTOMAYO의 가사는 직설적인 표현 대신 추상적인 은유와 독창적인 단어 조합으로 가득 차 있습니다. 그들이 구축한 심오한 가사의 세계를 관통하는 핵심적인 테마들을 분석합니다.</p>
+            </div>
+             <div class="flex flex-wrap justify-center gap-4 mb-8">
+                <button class="lyric-btn bg-white text-gray-700 px-5 py-3 rounded-lg font-semibold shadow cursor-pointer border-2 border-transparent transition-all" data-theme="time">시간과 초조함</button>
+                <button class="lyric-btn bg-white text-gray-700 px-5 py-3 rounded-lg font-semibold shadow cursor-pointer border-2 border-transparent transition-all" data-theme="identity">정체성과 자기비판</button>
+                <button class="lyric-btn bg-white text-gray-700 px-5 py-3 rounded-lg font-semibold shadow cursor-pointer border-2 border-transparent transition-all" data-theme="conflict">세상과의 불화</button>
+            </div>
+            <div id="lyric-analysis-content" class="bg-white p-8 rounded-lg shadow-lg min-h-[200px] fade-in">
+                <p id="lyric-analysis-text" class="text-gray-600 leading-relaxed">분석할 가사 테마를 선택하세요.</p>
+            </div>
+        </section>
+
+        <section id="discography" class="scroll-mt-20">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl font-bold text-gray-800">주요 곡 분석: 스타일의 변천</h2>
+                <p class="mt-4 text-gray-600 max-w-2xl mx-auto">ZUTOMAYO의 대표곡들을 통해 그들의 음악적 특징과 스타일의 진화를 살펴봅니다. 각 카드를 클릭하여 해당 곡의 구성, 사운드, 가사에 대한 심층 분석을 확인하세요.</p>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <div class="song-card bg-white p-6 rounded-lg shadow cursor-pointer border-2 border-transparent transition-all" data-song="byoushin">
+                    <h4 class="text-xl font-bold text-gray-800">秒針を噛む</h4><p class="text-gray-500 mt-2">스타일의 정수, 데뷔곡</p></div>
+                <div class="song-card bg-white p-6 rounded-lg shadow cursor-pointer border-2 border-transparent transition-all" data-song="kan">
+                    <h4 class="text-xl font-bold text-gray-800">勘冴えて悔しいわ</h4><p class="text-gray-500 mt-2">재즈 록의 폭발</p></div>
+                 <div class="song-card bg-white p-6 rounded-lg shadow cursor-pointer border-2 border-transparent transition-all" data-song="mabushii">
+                    <h4 class="text-xl font-bold text-gray-800">お勉強しといてよ</h4><p class="text-gray-500 mt-2">펑키 그루브와 냉소</p></div>
+                <div class="song-card bg-white p-6 rounded-lg shadow cursor-pointer border-2 border-transparent transition-all" data-song="seigi">
+                    <h4 class="text-xl font-bold text-gray-800">正義</h4><p class="text-gray-500 mt-2">서정성과 격정의 공존</p></div>
+                <div class="song-card bg-white p-6 rounded-lg shadow cursor-pointer border-2 border-transparent transition-all" data-song="zanki">
+                    <h4 class="text-xl font-bold text-gray-800">残機</h4><p class="text-gray-500 mt-2">애니메이션 타이업과 대중성</p></div>
+                 <div class="song-card bg-white p-6 rounded-lg shadow cursor-pointer border-2 border-transparent transition-all" data-song="kettobashite">
+                    <h4 class="text-xl font-bold text-gray-800">綺羅キラー</h4><p class="text-gray-500 mt-2">하이퍼팝적 진화</p></div>
+            </div>
+             <div id="song-analysis-content" class="mt-8 bg-white p-8 rounded-lg shadow-lg min-h-[250px] fade-in hidden">
+                <h3 id="song-analysis-title" class="text-2xl font-bold text-gray-800 mb-4"></h3>
+                <p id="song-analysis-text" class="text-gray-600 leading-relaxed"></p>
+            </div>
+        </section>
+
+    </main>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+
+            const soundData = {
+                vocals: {
+                    title: "ACAね 보컬: 감정의 폭발",
+                    text: "ZUTOMAYO의 정체성이자 가장 강력한 무기. 속삭이는 듯한 저음부터 뇌리를 관통하는 초고음까지, 극단적인 음역대를 자유자재로 넘나들며 곡의 감정선을 지배합니다. 특유의 날카로운 발음과 멜로디를 비트는 듯한 독창적인 창법은 가사의 서사를 극대화하며, 라이브에서는 음원을 가볍게 뛰어넘는 폭발적인 에너지로 청중을 압도합니다. '勘冴えて悔しいわ'의 후반부 샤우팅은 그녀의 기술적, 감정적 역량의 정점을 보여주는 예시입니다.",
+                    chartData: [35, 15, 20, 15, 15] 
+                },
+                bass: {
+                    title: "베이스 라인: 곡의 숨겨진 주인공",
+                    text: "단순히 리듬을 받치는 역할을 넘어, 제2의 멜로디 라인을 형성하는 공격적이고 현란한 베이스가 ZUTOMAYO 사운드의 핵심입니다. 슬랩, 태핑 등 고난이도 주법을 적극적으로 사용하여 곡에 펑키(Funky)한 그루브와 극적인 긴장감을 동시에 불어넣습니다. '秒針を噛む'의 상징적인 도입부처럼, 베이스가 곡의 시작과 전체 분위기를 지배하며 청자에게 강렬한 첫인상을 남깁니다. 라이브에서는 더욱 즉흥적인 연주로 곡을 이끌어갑니다.",
+                    chartData: [20, 30, 20, 15, 15]
+                },
+                piano: {
+                    title: "피아노/키보드: 다채로운 색채와 화성",
+                    text: "재즈를 기반으로 한 복잡하고 세련된 화성과 즉흥적인 프레이즈가 곡의 깊이를 더합니다. 때로는 '正義'처럼 서정적인 멜로디로 감성을 자극하고, 때로는 'お勉強しといてよ'처럼 리드미컬한 연주로 흥을 돋우는 등 곡의 전개에 맞춰 변화무쌍한 역할을 수행합니다. 로즈 피아노, 오르간, 신시사이저 등 다양한 건반 악기를 활용하여 풍성하고 입체적인 사운드 스케이프를 구축하는 데 핵심적인 역할을 합니다.",
+                    chartData: [20, 20, 30, 15, 15]
+                },
+                drums: {
+                    title: "드럼/리듬: 정교한 설계와 예측 불허",
+                    text: "정박을 벗어나는 변칙적인 박자와 복잡한 필인(Fill-in)으로 곡의 구조를 정교하게 설계합니다. 힙합, 펑크, 록, 재즈 등 다양한 장르의 리듬을 자유자재로 혼합하여 곡에 예측 불가능한 재미와 역동성을 부여합니다. 특히 라이브에서 보여주는 드러머의 폭발적인 에너지와 정교한 테크닉은 밴드 전체의 사운드를 한 단계 높은 차원으로 끌어올리는 강력한 원동력입니다.",
+                    chartData: [15, 20, 20, 30, 15]
+                },
+                strings: {
+                    title: "스트링/브라스: 극적인 장치",
+                    text: "ZUTOMAYO는 종종 스트링과 브라스 세션을 사용하여 사운드의 스케일을 확장하고 감정선을 극대화합니다. '正義'에서처럼 애절한 분위기를 고조시키거나, 'お勉強しといてよ'에서처럼 펑키한 그루브를 강화하는 역할을 합니다. 이러한 오케스트라적 요소들은 밴드 사운드와 결합하여 한 편의 영화 음악 같은 웅장하고 드라마틱한 분위기를 연출하며, 곡의 서사를 더욱 풍부하게 만듭니다.",
+                    chartData: [10, 15, 10, 10, 55]
+                }
+            };
+            
+            const liveAnalysisData = {
+                intro: "「기」: 공연의 시작은 단순한 등장이 아닌, ZUTOMAYO의 세계관으로 관객을 초대하는 의식입니다. 미니멀한 조명, 신비로운 분위기의 연주곡, 그리고 브라운관 TV나 폐공장 같은 독특한 무대 소품들은 관객의 기대감을 최고조로 끌어올리며 공연에 대한 완전한 몰입을 유도합니다. ACAね는 실루엣으로만 등장하여 신비감을 극대화합니다.",
+                main: "「승」: 도입부의 정적을 깨고 폭발적인 에너지의 곡들로 본편이 시작됩니다. 음원과는 차원이 다른 라이브 버전의 편곡이 특징으로, 각 악기 파트의 솔로 연주나 변주가 더해져 훨씬 다이내믹하고 생동감 넘치는 사운드를 선사합니다. ACAね의 라이브는 CD를 삼킨 듯한 안정감과 음원을 초월하는 성량, 감정 표현으로 관객을 압도합니다.",
+                jam: "「전」: 공연 중반부에는 멤버들의 기량을 마음껏 뽐내는 즉흥 연주(Jam) 세션이 포함됩니다. 정해진 틀 없이 서로의 연주에 반응하며 만들어내는 음악적 대화는 ZUTOMAYO가 최정상급 연주자들로 구성된 '밴드'임을 증명하는 순간입니다. 이 세션은 매 공연마다 달라져 라이브에서만 느낄 수 있는 유일무이한 경험을 선사합니다.",
+                climax: "「결」: 공연 후반부는 대표곡들과 함께 감정선을 최고조로 끌어올립니다. 화려한 조명과 레이저, 특수효과 등 시각적 연출이 더해져 시청각적 쾌감을 극대화하며, 밴드와 관객이 하나가 되는 폭발적인 에너지를 분출합니다. 모든 것을 쏟아내는 듯한 ACAね의 열창과 밴드의 혼신을 다한 연주는 깊은 여운을 남깁니다.",
+                encore: "「종」: 본편의 열기가 채 가시지 않은 채 시작되는 앙코르는 팬들을 위한 선물과도 같습니다. 조금 더 편안한 분위기에서 미공개 곡을 선보이거나, 관객과 소통하며 색다른 모습을 보여주기도 합니다. 마지막 곡이 끝난 후, ACAね는 항상 깊은 감사 인사와 함께 무대 뒤로 사라지며, 다음을 기약하는 여운을 남깁니다."
+            };
+
+             const lyricAnalysisData = {
+                time: "ZUTOMAYO 가사의 가장 중요한 키워드는 '시간'입니다. '초침을 깨물다(秒針を噛む)', '1초도 만나고 싶지 않아(1秒も会いたくない)' 등 시간과 관련된 표현이 빈번하게 등장합니다. 이는 멈추지 않는 시간에 대한 초조함, 과거에 대한 후회, 불확실한 미래에 대한 불안 등 현대인이 느끼는 보편적인 감정을 상징합니다. 시간은 때로 구원자이자 때로는 파괴자로서, 복합적인 의미를 지닙니다.",
+                identity: "가사 속 화자는 종종 자신의 정체성에 대해 고뇌하고, 때로는 자기 자신을 비판하는 모습을 보입니다. 예를 들어 '공부나 해둬(お勉強しといてよ)'의 '우등생은 될 수 없어(優等生にはなれない)'라는 구절처럼, 사회적 기대나 정해진 틀에 부응하지 못하는 자신에 대한 자조적인 묘사가 특징입니다. 이는 익명으로 활동하는 ACAね 자신의 이야기일 수도, 혹은 완벽을 강요하는 사회 속에서 자아를 잃어가는 우리 모두의 이야기일 수도 있습니다. 이러한 날카로운 자기 성찰은 깊은 공감대를 형성합니다.",
+                conflict: "가사에는 사회의 부조리, 무의미한 규칙, 이해할 수 없는 타인 등 '세상'과의 불화와 갈등이 녹아 있습니다. '공부나 해둬(お勉強しといてよ)'처럼 사회적 통념에 대한 냉소적인 태도를 보이거나, '정의(正義)'처럼 자신만의 정의를 관철하려는 의지를 드러냅니다. 이는 세상에 순응하기보다 자신만의 방식으로 맞서 싸우려는 주체적인 태도를 보여주며, ZUTOMAYO 음악의 반항적인 매력을 구성하는 중요한 요소입니다."
+            };
+
+            const songAnalysisData = {
+                byoushin: {
+                    title: "秒針を噛む (초침을 깨물다)",
+                    text: "ZUTOMAYO의 시작을 알린 기념비적인 데뷔곡. 도입부의 현란한 슬랩 베이스 라인은 곡의 정체성이자 J-POP 씬에 던진 출사표였습니다. 재지한 피아노, 변칙적인 리듬, 그리고 폭발적인 후렴구로 이어지는 구성은 기존의 문법을 따르지 않는 ZUTOMAYO만의 스타일을 명확히 보여줍니다. '평범한 일상 속 초조함과 자기 파괴적 충동'이라는 독특한 가사는 ACAね의 날카로운 보컬과 만나 강력한 시너지를 발휘합니다."
+                },
+                kan: {
+                    title: "勘冴えて悔しいわ (감 좋아서 분해)",
+                    text: "빠른 템포의 재즈 록 넘버. 쉴 틈 없이 몰아치는 드럼과 베이스 위에 자유롭게 유영하는 피아노, 그리고 모든 것을 뚫고 나오는 ACAね의 초고음 보컬이 압권입니다. 특히 곡 후반부의 스캣(Scat)과 샤우팅은 보컬리스트로서 그녀의 한계 없는 역량을 증명합니다. 복잡한 코드 진행과 각 파트의 현란한 연주가 절묘하게 어우러져, 기술적으로 가장 높은 난이도를 자랑하는 곡 중 하나로 꼽힙니다."
+                },
+                mabushii: {
+                    title: "お勉強しといてよ (공부나 해둬)",
+                    text: "디스코와 펑크(Funk) 리듬을 기반으로 한 중독성 강한 곡. 그루비한 베이스 라인과 화려한 브라스 세션이 곡 전체에 흥겨운 분위기를 불어넣습니다. 사회적 통념과 타인의 시선에 대한 냉소적인 메시지를 담은 가사는 경쾌한 멜로디와 대조를 이루며 ZUTOMAYO 특유의 독창적인 세계관을 보여줍니다. 비교적 단순한 구조 속에서도 각 악기 파트의 디테일한 연주가 돋보이는 곡입니다."
+                },
+                seigi: {
+                    title: "正義 (정의)",
+                    text: "서정적인 피아노 아르페지오로 시작하여 점차 격정적으로 고조되는 발라드 곡. 애절한 스트링 사운드가 ACAね의 호소력 짙은 보컬과 어우러져 극적인 감정선을 만들어냅니다. '나만의 정의'를 지키기 위해 모든 것을 내던지는 듯한 가사는 듣는 이의 마음을 울립니다. ZUTOMAYO의 음악 스펙트럼이 단순히 기술적인 현란함에만 머무르지 않고, 깊은 감성을 표현하는 데에도 탁월함을 증명한 곡입니다."
+                },
+                zanki: {
+                    title: "残機 (남은 목숨)",
+                    text: "인기 애니메이션 '체인소 맨'의 엔딩 테마로 사용되며 ZUTOMAYO의 대중적 인지도를 크게 높인 곡입니다. 질주감 넘치는 록 사운드를 기반으로 하면서도, 중독성 있는 멜로디와 캐치한 후렴구를 통해 폭넓은 팬층을 사로잡았습니다. 작품의 세계관을 가사에 절묘하게 녹여내면서도 ZUTOMAYO 고유의 색깔을 잃지 않은, 성공적인 타이업의 모범 사례로 평가받습니다."
+                },
+                kettobashite: {
+                    title: "綺羅キラー (반짝 킬러)",
+                    text: "최근 음악적 경향인 하이퍼팝(Hyperpop) 요소를 적극적으로 수용한 곡으로, ZUTOMAYO의 끊임없는 음악적 진화를 보여줍니다. 왜곡된 보컬 샘플, 공격적인 신스 사운드, 빠른 BPM이 특징이며, 아마존 프라임 비디오 CM송으로 사용되었습니다. 래퍼 Mori Calliope가 피처링으로 참여하여 새로운 시너지를 창출했으며, 이는 ZUTOMAYO가 앞으로 나아갈 방향에 대한 힌트를 제공합니다."
+                }
+            };
+            
+            let soundChart;
+
+            function updateAnalysis(elementKey) {
+                const content = soundData[elementKey];
+                document.getElementById('analysis-title').innerText = content.title;
+                document.getElementById('analysis-text').innerText = content.text;
+                document.getElementById('analysis-content').classList.remove('fade-in');
+                void document.getElementById('analysis-content').offsetWidth;
+                document.getElementById('analysis-content').classList.add('fade-in');
+
+                soundChart.data.datasets[0].data = content.chartData;
+                soundChart.update();
+            }
+            
+            function createChart() {
+                const ctx = document.getElementById('soundChart').getContext('2d');
+                soundChart = new Chart(ctx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['보컬', '베이스', '피아노', '드럼', '스트링/브라스'],
+                        datasets: [{
+                            label: '사운드 비중',
+                            data: [35, 15, 20, 15, 15],
+                            backgroundColor: [
+                                'rgba(16, 185, 129, 0.8)', 'rgba(55, 65, 81, 0.8)',
+                                'rgba(107, 114, 128, 0.8)', 'rgba(156, 163, 175, 0.8)', 'rgba(249, 115, 22, 0.8)'
+                            ],
+                            borderColor: '#f8f9fa',
+                            borderWidth: 2
+                        }]
+                    },
+                    options: {
+                        responsive: true, maintainAspectRatio: false, cutout: '60%',
+                        plugins: { legend: { position: 'bottom' } }
+                    }
+                });
+            }
+
+            createChart();
+            updateAnalysis('vocals');
+
+            document.querySelectorAll('.sound-btn').forEach(button => {
+                button.addEventListener('click', () => {
+                    document.querySelectorAll('.sound-btn').forEach(btn => {
+                        btn.classList.remove('bg-emerald-500', 'text-white');
+                        btn.classList.add('bg-white', 'text-gray-700');
+                    });
+                    button.classList.add('bg-emerald-500', 'text-white');
+                    button.classList.remove('bg-white', 'text-gray-700');
+                    updateAnalysis(button.dataset.element);
+                });
+            });
+
+            const timelineItems = document.querySelectorAll('.timeline-item');
+            const liveAnalysisText = document.getElementById('live-analysis-text');
+            const liveAnalysisContainer = document.getElementById('live-analysis-content');
+
+            timelineItems.forEach(item => {
+                item.addEventListener('click', () => {
+                    timelineItems.forEach(i => i.classList.remove('active'));
+                    item.classList.add('active');
+                    const stage = item.dataset.stage;
+                    liveAnalysisText.textContent = liveAnalysisData[stage];
+                    liveAnalysisContainer.classList.remove('fade-in');
+                    void liveAnalysisContainer.offsetWidth;
+                    liveAnalysisContainer.classList.add('fade-in');
+                });
+            });
+            timelineItems[0].click();
+
+            const lyricBtns = document.querySelectorAll('.lyric-btn');
+            const lyricAnalysisText = document.getElementById('lyric-analysis-text');
+            const lyricAnalysisContainer = document.getElementById('lyric-analysis-content');
+
+            lyricBtns.forEach(button => {
+                button.addEventListener('click', () => {
+                    lyricBtns.forEach(btn => btn.classList.remove('active'));
+                    button.classList.add('active');
+                    const theme = button.dataset.theme;
+                    lyricAnalysisText.textContent = lyricAnalysisData[theme];
+                    lyricAnalysisContainer.classList.remove('fade-in');
+                    void lyricAnalysisContainer.offsetWidth;
+                    lyricAnalysisContainer.classList.add('fade-in');
+                })
+            });
+            lyricBtns[0].click();
+
+
+            const songCards = document.querySelectorAll('.song-card');
+            const songAnalysisContainer = document.getElementById('song-analysis-content');
+            const songAnalysisTitle = document.getElementById('song-analysis-title');
+            const songAnalysisText = document.getElementById('song-analysis-text');
+
+            songCards.forEach(card => {
+                card.addEventListener('click', () => {
+                    const currentActive = document.querySelector('.song-card.active');
+                    if (currentActive && currentActive !== card) {
+                        currentActive.classList.remove('active');
+                    }
+                    card.classList.toggle('active');
+
+                    if (card.classList.contains('active')) {
+                        const song = card.dataset.song;
+                        songAnalysisTitle.textContent = songAnalysisData[song].title;
+                        songAnalysisText.textContent = songAnalysisData[song].text;
+                        songAnalysisContainer.classList.remove('hidden');
+                        songAnalysisContainer.classList.remove('fade-in');
+                        void songAnalysisContainer.offsetWidth;
+                        songAnalysisContainer.classList.add('fade-in');
+                    } else {
+                        songAnalysisContainer.classList.add('hidden');
+                    }
+                });
+            });
+            
+            const navLinks = document.querySelectorAll('.nav-link');
+            const sections = document.querySelectorAll('main section');
+
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        const id = entry.target.getAttribute('id');
+                        navLinks.forEach(link => {
+                            link.classList.toggle('active-nav', link.getAttribute('href') === `#${id}`);
+                            link.classList.toggle('inactive-nav', link.getAttribute('href') !== `#${id}`);
+                        });
+                    }
+                });
+            }, { rootMargin: '-50% 0px -50% 0px', threshold: 0 });
+
+            sections.forEach(section => observer.observe(section));
+
+            navLinks.forEach(link => {
+                link.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    document.querySelector(link.getAttribute('href')).scrollIntoView({ behavior: 'smooth' });
+                });
+            });
+        });
+    </script>
+</body>
+</html>
