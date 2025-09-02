@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>10km 마라톤 8주 훈련 계획</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Warm Neutrals -->
+    <!-- Application Structure Plan: The application is designed as a single-page dashboard for a runner. The structure prioritizes immediate utility and progressive disclosure of information. It starts with an 'Interval Calculator' to directly answer the user's primary question. This is followed by a tabbed '8-Week Training Plan' which breaks down the long-term schedule into manageable weekly views, preventing information overload. A 'Workout Guide' section explains the terminology used in the plan. Finally, a 'Progress Chart' visually summarizes the increasing training load, offering motivation. This thematic, tab-based structure was chosen over a linear report format to allow users to easily navigate between their immediate calculation needs and their long-term schedule, making the plan feel more interactive and less intimidating. -->
+    <!-- Visualization & Content Choices: 
+    1. Interval Calculation: Goal=Inform/Calculate. Method=Interactive form. Interaction=User inputs target distance, JS calculates required sets. Justification=Provides immediate, personalized answer to the user's core question.
+    2. 8-Week Plan: Goal=Organize/Guide. Method=Tabbed HTML tables. Interaction=Clicking tabs reveals weekly schedules. Justification=Breaks down a complex 8-week plan into digestible weekly chunks, improving usability.
+    3. Workout Guide: Goal=Inform/Educate. Method=Styled HTML text blocks. Interaction=Static content for reference. Justification=Clarifies training terms, ensuring the user performs workouts correctly.
+    4. Progress Chart: Goal=Change/Motivate. Method=Line Chart (Chart.js). Interaction=Visualizes weekly total distance, showing progression. Justification=Offers a quick, motivating overview of the training load, highlighting the gradual increase and final taper. Library=Chart.js.
+    -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Noto Sans KR', 'Inter', sans-serif;
+            background-color: #FDFBF8;
+        }
+        .tab-active {
+            background-color: #F97316;
+            color: white;
+            border-color: #F97316;
+        }
+        .tab-inactive {
+            background-color: white;
+            color: #6B7280;
+            border-color: #D1D5DB;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 300px;
+            max-height: 400px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 400px;
+            }
+        }
+    </style>
+</head>
+<body class="bg-stone-50 text-stone-800">
+
+    <div class="container mx-auto p-4 sm:p-6 md:p-8 max-w-7xl">
+
+        <header class="text-center mb-10">
+            <h1 class="text-4xl md:text-5xl font-bold text-orange-600 mb-2">10km 마라톤 8주 완성 훈련 계획</h1>
+            <p class="text-lg text-stone-600">체계적인 훈련으로 목표를 달성하세요!</p>
+        </header>
+
+        <main>
+            <!-- 인터벌 계산기 -->
+            <section id="calculator" class="bg-white p-6 rounded-2xl shadow-lg mb-10">
+                <h2 class="text-2xl font-bold mb-4 text-stone-700 border-b pb-2">🎯 인터벌 훈련 계산기</h2>
+                <p class="text-stone-600 mb-6">제시하신 인터벌 방법(워밍업 6km/h 10분, 훈련 9km/h 2분, 회복 6km/h 1분)을 기반으로 목표 거리를 달리기 위해 필요한 세트 수를 계산합니다. 훈련 후 쿨다운 10분(1km)이 포함됩니다.</p>
+                <div class="flex flex-col sm:flex-row items-center gap-4">
+                    <div class="w-full sm:w-auto flex-grow">
+                        <label for="distance" class="block text-sm font-medium text-stone-700 mb-1">목표 거리 (km)</label>
+                        <input type="number" id="distance" value="10" class="w-full p-3 border border-stone-300 rounded-lg shadow-sm focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition">
+                    </div>
+                    <button id="calculateBtn" class="w-full sm:w-auto bg-orange-500 text-white font-bold py-3 px-6 rounded-lg hover:bg-orange-600 transition duration-300 shadow-md self-end">계산하기</button>
+                </div>
+                <div id="result" class="mt-6 bg-orange-50 p-4 rounded-lg text-center hidden">
+                    <p class="text-lg font-semibold text-orange-800"><span id="targetDistance"></span>km를 완주하려면, 약 <span id="sets" class="text-2xl font-bold"></span>세트의 인터벌 훈련이 필요합니다.</p>
+                    <p class="text-sm text-stone-600 mt-2" id="calculation-details"></p>
+                </div>
+            </section>
+
+            <!-- 8주 훈련 계획 -->
+            <section id="plan" class="mb-10">
+                <h2 class="text-3xl font-bold text-center mb-8 text-stone-700">🗓️ 8주 훈련 계획 (월~금)</h2>
+                <div id="tabs" class="flex flex-wrap justify-center gap-2 mb-6">
+                </div>
+
+                <div id="plan-content" class="bg-white p-4 sm:p-6 rounded-2xl shadow-lg transition-opacity duration-500">
+                </div>
+            </section>
+            
+            <!-- 훈련 가이드 -->
+            <section id="guide" class="bg-white p-6 rounded-2xl shadow-lg mb-10">
+                <h2 class="text-2xl font-bold mb-4 text-stone-700 border-b pb-2">💡 훈련 가이드</h2>
+                <div class="grid md:grid-cols-2 gap-6">
+                    <div>
+                        <h3 class="font-semibold text-lg text-orange-600">인터벌 러닝 (Interval)</h3>
+                        <p class="text-stone-600">빠르게 달리는 구간과 천천히 달리거나 걷는 회복 구간을 반복하는 훈련입니다. 심폐지구력과 스피드를 향상시키는 데 매우 효과적입니다.</p>
+                    </div>
+                    <div>
+                        <h3 class="font-semibold text-lg text-orange-600">가벼운 달리기 (Easy Run)</h3>
+                        <p class="text-stone-600">대화를 나눌 수 있을 정도의 편안한 속도로 달립니다. 몸의 피로를 회복하고 유산소 능력을 길러주는 기본 훈련입니다.</p>
+                    </div>
+                    <div>
+                        <h3 class="font-semibold text-lg text-orange-600">지속주 (Tempo Run)</h3>
+                        <p class="text-stone-600">'편안하게 힘든' 느낌으로 일정 시간 동안 꾸준히 달리는 훈련입니다. 레이스 페이스에 대한 적응력을 높여줍니다.</p>
+                    </div>
+                    <div>
+                        <h3 class="font-semibold text-lg text-orange-600">장거리 달리기 (Long Run)</h3>
+                        <p class="text-stone-600">대회 거리와 비슷하거나 더 긴 거리를 천천히 달립니다. 체력과 정신력을 기르는 데 필수적인 훈련이며, 주로 주말에 실시하는 것을 권장합니다.</p>
+                    </div>
+                </div>
+            </section>
+
+             <!-- 주간 훈련량 변화 차트 -->
+            <section id="chart-section">
+                <h2 class="text-3xl font-bold text-center mb-8 text-stone-700">📈 주간 훈련량 변화</h2>
+                <div class="bg-white p-4 sm:p-6 rounded-2xl shadow-lg">
+                    <div class="chart-container">
+                        <canvas id="progressChart"></canvas>
+                    </div>
+                </div>
+            </section>
+
+        </main>
+    </div>
+
+    <script>
+        const trainingPlan = {
+            1: {
+                title: "1주차: 기초 다지기",
+                plan: [
+                    { day: "월", type: "휴식", details: "완전한 휴식 또는 가벼운 스트레칭" },
+                    { day: "화", type: "인터벌", details: "워밍업 10분, (9km/h 2분, 6km/h 1분) x 6세트, 쿨다운 10분" },
+                    { day: "수", type: "가벼운 달리기", details: "30분, 편안한 속도" },
+                    { day: "목", type: "가벼운 달리기", details: "30분, 편안한 속도" },
+                    { day: "금", type: "휴식", details: "완전한 휴식" },
+                ],
+                weekend: "장거리 달리기 5km",
+                totalKm: 13.4
+            },
+            2: {
+                title: "2주차: 강도 높이기",
+                plan: [
+                    { day: "월", type: "휴식", details: "완전한 휴식 또는 가벼운 스트레칭" },
+                    { day: "화", type: "인터벌", details: "워밍업 10분, (9km/h 2분, 6km/h 1분) x 8세트, 쿨다운 10분" },
+                    { day: "수", type: "가벼운 달리기", details: "35분, 편안한 속도" },
+                    { day: "목", type: "지속주", details: "워밍업 10분, 15분간 '편안하게 힘든' 속도로 달리기, 쿨다운 10분" },
+                    { day: "금", type: "휴식", details: "완전한 휴식" },
+                ],
+                weekend: "장거리 달리기 6km",
+                totalKm: 19.2
+            },
+            3: {
+                title: "3주차: 지구력 향상",
+                plan: [
+                    { day: "월", type: "휴식", details: "완전한 휴식 또는 가벼운 스트레칭" },
+                    { day: "화", type: "인터벌", details: "워밍업 10분, (9km/h 2분, 6km/h 1분) x 10세트, 쿨다운 10분" },
+                    { day: "수", type: "가벼운 달리기", details: "40분, 편안한 속도" },
+                    { day: "목", type: "가벼운 달리기", details: "30분, 편안한 속도" },
+                    { day: "금", type: "휴식", details: "완전한 휴식" },
+                ],
+                weekend: "장거리 달리기 7km",
+                totalKm: 22.0
+            },
+            4: {
+                title: "4주차: 한 단계 더",
+                plan: [
+                    { day: "월", type: "휴식", details: "완전한 휴식 또는 가벼운 스트레칭" },
+                    { day: "화", type: "인터벌", details: "워밍업 10분, (9km/h 2분, 6km/h 1분) x 12세트, 쿨다운 10분" },
+                    { day: "수", type: "가벼운 달리기", details: "40분, 편안한 속도" },
+                    { day: "목", type: "지속주", details: "워밍업 10분, 20분간 '편안하게 힘든' 속도로 달리기, 쿨다운 10분" },
+                    { day: "금", type: "휴식", details: "완전한 휴식" },
+                ],
+                weekend: "장거리 달리기 8km",
+                totalKm: 27.8
+            },
+            5: {
+                title: "5주차: 최대 훈련량",
+                plan: [
+                    { day: "월", type: "휴식", details: "완전한 휴식 또는 가벼운 스트레칭" },
+                    { day: "화", type: "인터벌", details: "워밍업 10분, (9km/h 2분, 6km/h 1분) x 15세트, 쿨다운 10분" },
+                    { day: "수", type: "가벼운 달리기", details: "45분, 편안한 속도" },
+                    { day: "목", type: "가벼운 달리기", details: "35분, 편안한 속도" },
+                    { day: "금", type: "휴식", details: "완전한 휴식" },
+                ],
+                weekend: "장거리 달리기 10km",
+                totalKm: 31.0
+            },
+            6: {
+                title: "6주차: 자신감 구축",
+                plan: [
+                    { day: "월", type: "휴식", details: "완전한 휴식 또는 가벼운 스트레칭" },
+                    { day: "화", type: "인터벌", details: "워밍업 10분, (9km/h 2분, 6km/h 1분) x 12세트, 쿨다운 10분" },
+                    { day: "수", type: "가벼운 달리기", details: "40분, 편안한 속도" },
+                    { day: "목", type: "지속주", details: "워밍업 10분, 25분간 '편안하게 힘든' 속도로 달리기, 쿨다운 10분" },
+                    { day: "금", type: "휴식", details: "완전한 휴식" },
+                ],
+                weekend: "장거리 달리기 8km (대회 페이스)",
+                totalKm: 28.8
+            },
+            7: {
+                title: "7주차: 컨디션 조절",
+                plan: [
+                    { day: "월", type: "휴식", details: "완전한 휴식 또는 가벼운 스트레칭" },
+                    { day: "화", type: "인터벌", details: "워밍업 10분, (9km/h 2분, 6km/h 1분) x 8세트, 쿨다운 10분" },
+                    { day: "수", type: "가벼운 달리기", details: "30분, 편안한 속도" },
+                    { day: "목", type: "가벼운 달리기", details: "20분, 편안한 속도" },
+                    { day: "금", type: "휴식", details: "완전한 휴식" },
+                ],
+                weekend: "가볍게 5km 달리기",
+                totalKm: 16.2
+            },
+            8: {
+                title: "8주차: 대회 준비",
+                plan: [
+                    { day: "월", type: "휴식", details: "완전한 휴식" },
+                    { day: "화", type: "가벼운 달리기", details: "20분, 중간에 1분 질주 2~3회 포함" },
+                    { day: "수", type: "휴식", details: "완전한 휴식" },
+                    { day: "목", type: "가벼운 달리기", details: "15분, 아주 편안하게" },
+                    { day: "금", type: "휴식", details: "완벽한 휴식, 대회 준비" },
+                ],
+                weekend: "🎉 10km 마라톤 대회!",
+                totalKm: 15.0 
+            },
+        };
+        
+        document.addEventListener('DOMContentLoaded', () => {
+            const tabsContainer = document.getElementById('tabs');
+            const planContent = document.getElementById('plan-content');
+            const calculateBtn = document.getElementById('calculateBtn');
+            const resultDiv = document.getElementById('result');
+
+            function displayPlan(week) {
+                const weekData = trainingPlan[week];
+                planContent.innerHTML = `
+                    <h3 class="text-2xl font-bold mb-4 text-center text-stone-800">${weekData.title}</h3>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse">
+                            <thead>
+                                <tr class="bg-stone-100">
+                                    <th class="p-3 font-semibold text-sm text-stone-600 uppercase tracking-wider">요일</th>
+                                    <th class="p-3 font-semibold text-sm text-stone-600 uppercase tracking-wider">훈련 종류</th>
+                                    <th class="p-3 font-semibold text-sm text-stone-600 uppercase tracking-wider">상세 내용</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${weekData.plan.map(p => `
+                                    <tr class="border-b border-stone-200">
+                                        <td class="p-3 font-bold">${p.day}</td>
+                                        <td class="p-3"><span class="px-2 py-1 text-xs font-semibold rounded-full ${p.type === '휴식' ? 'bg-blue-100 text-blue-800' : p.type === '인터벌' ? 'bg-red-100 text-red-800' : p.type === '지속주' ? 'bg-yellow-100 text-yellow-800' : 'bg-green-100 text-green-800'}">${p.type}</span></td>
+                                        <td class="p-3 text-stone-600">${p.details}</td>
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="mt-6 p-4 bg-orange-50 rounded-lg">
+                        <h4 class="font-bold text-orange-800">⭐ 주말 추천 훈련</h4>
+                        <p class="text-orange-700">${weekData.weekend}</p>
+                    </div>
+                `;
+                
+                document.querySelectorAll('.tab-btn').forEach(btn => {
+                    btn.classList.remove('tab-active');
+                    btn.classList.add('tab-inactive');
+                });
+                document.querySelector(`.tab-btn[data-week='${week}']`).classList.add('tab-active');
+                document.querySelector(`.tab-btn[data-week='${week}']`).classList.remove('tab-inactive');
+            }
+
+            for (let i = 1; i <= 8; i++) {
+                const tab = document.createElement('button');
+                tab.textContent = `${i}주차`;
+                tab.dataset.week = i;
+                tab.className = `tab-btn py-2 px-4 rounded-lg font-semibold border-2 transition-all duration-300 ${i === 1 ? 'tab-active' : 'tab-inactive'}`;
+                tab.addEventListener('click', () => displayPlan(i));
+                tabsContainer.appendChild(tab);
+            }
+
+            calculateBtn.addEventListener('click', () => {
+                const distance = parseFloat(document.getElementById('distance').value);
+                if (isNaN(distance) || distance <= 2) {
+                    alert("2km 이상의 거리를 입력해주세요. (워밍업 1km + 쿨다운 1km)");
+                    return;
+                }
+                
+                const warmupDist = 1; // 10 min @ 6km/h
+                const cooldownDist = 1; // 10 min @ 6km/h
+                const intervalTargetDist = distance - warmupDist - cooldownDist;
+                
+                const distPerSet = (9 / 60 * 2) + (6 / 60 * 1); // 0.3km + 0.1km = 0.4km
+                
+                const requiredSets = Math.round(intervalTargetDist / distPerSet);
+
+                document.getElementById('targetDistance').textContent = distance;
+                document.getElementById('sets').textContent = requiredSets;
+                document.getElementById('calculation-details').textContent = `(계산: 워밍업 1km, 쿨다운 1km 제외 후 남은 ${intervalTargetDist.toFixed(1)}km를 1세트당 0.4km로 나누어 계산)`;
+                resultDiv.classList.remove('hidden');
+            });
+            
+            calculateBtn.click();
+            displayPlan(1);
+
+            const ctx = document.getElementById('progressChart').getContext('2d');
+            const chartData = Object.values(trainingPlan).map(week => week.totalKm);
+            const chartLabels = Object.keys(trainingPlan).map(week => `${week}주차`);
+            
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: chartLabels,
+                    datasets: [{
+                        label: '주간 총 훈련 거리 (km)',
+                        data: chartData,
+                        borderColor: '#F97316',
+                        backgroundColor: 'rgba(249, 115, 22, 0.1)',
+                        borderWidth: 3,
+                        tension: 0.4,
+                        fill: true,
+                        pointBackgroundColor: '#F97316',
+                        pointBorderColor: '#fff',
+                        pointHoverRadius: 7,
+                        pointRadius: 5
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: '거리 (km)'
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return `총 훈련량: ${context.parsed.y} km`;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+
+        });
+    </script>
+</body>
+</html>
