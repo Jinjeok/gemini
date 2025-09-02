@@ -1,4 +1,4 @@
-# .github/workflows/your-workflow-file.yml
+# .github/workflows/deploy.yml
 
 name: Build and Deploy to GitHub Pages
 
@@ -13,11 +13,10 @@ concurrency:
 
 jobs:
   # --------------------
-  # 1. 빌드(Build) 잡
+  # 1. 빌드 및 커밋(Build & Commit) 잡
   # --------------------
   build:
     runs-on: ubuntu-latest
-    # build 잡에 커밋을 위한 권한 추가
     permissions:
       contents: write # 레포지토리에 커밋하기 위한 권한
       pages: write      # GitHub Pages 아티팩트를 업로드하기 위한 권한
@@ -34,14 +33,15 @@ jobs:
       - name: Generate index.html
         run: node generate-index.js
 
-      # --- 이 부분을 다시 추가 ---
+      # --- 💡 여기를 수정했습니다 ---
       - name: Commit and Push changes
         run: |
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
           git add index.html
-          # 변경 사항이 있을 때만 커밋
-          if ! git diff --quiet && ! git diff --staged --quiet; then
+          # 변경 사항이 있을 때만 커밋 및 푸시
+          if ! git diff-index --quiet HEAD; then
+            echo "Changes found. Committing and pushing..."
             git commit -m "Automated: Update index.html"
             git push
           else
@@ -58,7 +58,7 @@ jobs:
           path: '.'
 
   # --------------------
-  # 2. 배포(Deploy) 잡 (여기는 수정할 필요 없음)
+  # 2. 배포(Deploy) 잡 (수정 필요 없음)
   # --------------------
   deploy:
     needs: build
