@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>80년대-00년대 일본 음악 탐험</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Warm Neutrals -->
+    <!-- Application Structure Plan: The application is structured by decade (80s, 90s, 00s) with a main overview, accessed via a top navigation bar. This thematic, chronological structure is the most intuitive for exploring music history. Users can get a high-level summary from the overview chart, then dive into a specific decade to explore key artists, genre trends via a donut chart, and iconic albums. Clicking an artist reveals detailed information without leaving the page, facilitating focused exploration. This design prioritizes user-driven discovery over a rigid, linear report format. -->
+    <!-- Visualization & Content Choices: 1. Overall Trend -> Goal: Compare change over decades -> Viz: Stacked Bar Chart -> Interaction: Hover for details -> Justification: Shows evolution of genre popularity clearly -> Library: Chart.js. 2. Decade Artists -> Goal: Organize & Inform -> Viz: Interactive Card Grid -> Interaction: Click to show details in a side panel -> Justification: Allows browsing many artists without clutter -> Method: HTML/Tailwind/JS. 3. Decade Genres -> Goal: Show proportions -> Viz: Donut Chart -> Interaction: Hover for details -> Justification: Best for showing parts-of-a-whole for a single period -> Library: Chart.js. 4. Album Art -> Goal: Inform/Context -> Viz: Image Grid -> Interaction: Hover for title -> Justification: Provides quick visual recognition -> Method: HTML/Tailwind. CONFIRMED NO SVG/Mermaid. -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Noto Sans KR', sans-serif;
+            background-color: #F5F5F4; /* stone-100 */
+            color: #44403C; /* stone-700 */
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 320px;
+            max-height: 400px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 400px;
+            }
+        }
+        .nav-btn {
+            transition: all 0.3s ease;
+        }
+        .nav-btn.active {
+            background-color: #A8A29E; /* stone-400 */
+            color: #FFFFFF;
+        }
+        .artist-card {
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        .artist-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+        }
+        .artist-card.active {
+            background-color: #D6D3D1; /* stone-300 */
+            border-color: #A8A29E; /* stone-400 */
+        }
+        .prose {
+            max-width: none;
+        }
+        .prose p {
+            margin-bottom: 1em;
+        }
+        .prose h4 {
+            margin-bottom: 0.5em;
+        }
+        .prose ul {
+            margin-top: 0.5em;
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <div class="container mx-auto p-4 sm:p-6 lg:p-8 max-w-7xl">
+        
+        <header class="text-center mb-8">
+            <h1 class="text-4xl md:text-5xl font-bold text-stone-800">일본 대중음악 30년사: 1980-2000</h1>
+            <p class="mt-4 text-lg text-stone-600 max-w-4xl mx-auto prose">
+                1980년대, 전례 없는 경제 호황 속에서 탄생한 '시티팝'의 세련된 낭만은 도시의 밤을 화려하게 수놓았습니다. 90년대에 들어 'J-POP'이라는 이름 아래 CD 시장은 폭발적으로 성장하며 수많은 밀리언셀러를 탄생시키는 황금기를 맞이했습니다. 2000년대는 디지털 시대의 개막과 함께 록 밴드들이 자신들만의 목소리를 내기 시작했고, 장르는 더욱 세분화되며 풍성한 음악적 토양을 만들었습니다. 본 보고서는 지난 30년간 일본 대중음악이 걸어온 역동적인 여정을 시대별 사회상, 주요 아티스트, 그리고 음악적 특징을 통해 심도 있게 탐구합니다. 각 시대를 클릭하여 그 시절의 공기와 감성을 느껴보시기 바랍니다.
+            </p>
+        </header>
+        
+        <nav class="flex justify-center space-x-2 md:space-x-4 mb-8 bg-stone-200 p-2 rounded-lg shadow-inner">
+            <button id="nav-overview" class="nav-btn px-4 py-2 rounded-md font-semibold text-stone-700" data-section="overview">개요</button>
+            <button id="nav-1980s" class="nav-btn px-4 py-2 rounded-md font-semibold text-stone-700" data-section="1980s">1980년대</button>
+            <button id="nav-1990s" class="nav-btn px-4 py-2 rounded-md font-semibold text-stone-700" data-section="1990s">1990년대</button>
+            <button id="nav-2000s" class="nav-btn px-4 py-2 rounded-md font-semibold text-stone-700" data-section="2000s">2000년대</button>
+        </nav>
+
+        <main>
+            <section id="overview-section" class="content-section">
+                <div class="bg-white p-6 rounded-lg shadow-md">
+                    <h2 class="text-2xl font-bold mb-4 text-center">시대별 장르 변화 개관</h2>
+                    <p class="text-center text-stone-600 mb-6 max-w-3xl mx-auto prose">
+                        본 차트는 1980년대부터 2000년대까지 30년간 일본 대중음악의 주요 장르가 차지하는 비중의 변화를 시각적으로 보여줍니다. 80년대 시티팝과 아이돌 팝의 강세에서 시작하여, 90년대 록과 팝의 양강 구도, 그리고 2000년대 록의 약진과 R&B/힙합의 등장을 통해 시대의 흐름에 따른 대중의 취향 변화를 한눈에 파악할 수 있습니다. 각 막대에 마우스를 올리면 장르별 비중을 확인할 수 있습니다.
+                    </p>
+                    <div class="chart-container">
+                        <canvas id="overviewChart"></canvas>
+                    </div>
+                </div>
+            </section>
+
+            <section id="1980s-section" class="content-section hidden">
+                <div class="bg-white p-6 rounded-lg shadow-md mb-8">
+                     <h2 class="text-3xl font-bold text-center mb-2">1980년대: 풍요의 시대, 시티팝과 밴드의 여명</h2>
+                    <p class="text-center text-stone-600 mb-6 max-w-4xl mx-auto prose">
+                        일본의 '버블 경제'가 정점에 달했던 1980년대는 문화적 풍요와 낙관주의가 사회 전반에 넘쳐흐르던 시기였습니다. 이러한 시대상을 배경으로 탄생한 '시티팝'은 재즈, 퓨전, AOR 등 서구의 세련된 사운드를 적극적으로 수용하여 도시의 화려함과 낭만을 노래했습니다. 야마시타 타츠로, 타케우치 마리야와 같은 아티스트들은 고품질의 사운드 프로듀싱을 통해 일본 음악의 수준을 한 단계 끌어올렸습니다. 동시에, 마츠다 세이코와 나카모리 아키나로 대표되는 아이돌 산업은 거대하게 성장하며 대중문화의 중심축이 되었습니다. 한편에서는 오자키 유타카가 젊은이들의 방황과 고뇌를 노래하며 기성세대에 대한 저항의 아이콘으로 떠올랐고, BOØWY와 같은 밴드들이 등장하며 90년대 밴드 붐의 서막을 열었습니다. LP와 카세트테이프가 주요 매체였던 이 시대는 아날로그 감성이 가득한 낭만의 시대였습니다.
+                    </p>
+                </div>
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                    <div class="lg:col-span-2 bg-white p-6 rounded-lg shadow-md">
+                        <h3 class="text-xl font-bold mb-4">주요 아티스트</h3>
+                        <div id="artists-grid-1980s" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 mb-6"></div>
+                        <div id="artist-details-1980s" class="bg-stone-50 p-4 rounded-lg min-h-[250px] prose">
+                            <p class="text-stone-500 text-center flex items-center justify-center h-full">아티스트를 선택하여 상세 정보를 확인하세요.</p>
+                        </div>
+                    </div>
+                    <div class="bg-white p-6 rounded-lg shadow-md">
+                        <h3 class="text-xl font-bold mb-4 text-center">장르 스포트라이트</h3>
+                        <div class="chart-container h-64 md:h-auto">
+                            <canvas id="genreChart1980s"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="1990s-section" class="content-section hidden">
+                <div class="bg-white p-6 rounded-lg shadow-md mb-8">
+                     <h2 class="text-3xl font-bold text-center mb-2">1990년대: J-POP의 황금기와 밀리언셀러 시대</h2>
+                    <p class="text-center text-stone-600 mb-6 max-w-4xl mx-auto prose">
+                        버블 경제 붕괴 이후 '잃어버린 10년'이 시작되었지만, 역설적으로 음악 시장은 역사상 가장 큰 호황을 누렸습니다. CD가 주요 매체로 자리 잡으며 음반 판매량이 폭발적으로 증가했고, 'J-POP'이라는 용어가 정착되며 일본 대중음악은 고유의 정체성을 확립했습니다. 이 시기는 '빙(Being) 계열' 아티스트들과 코무로 테츠야가 프로듀싱한 '코무로 패밀리'가 차트를 양분하며 치열한 경쟁을 펼쳤습니다. ZARD, B'z 등이 전자에, 아무로 나미에, globe 등이 후자에 속합니다. 한편에서는 Mr.Children, SPITZ와 같은 밴드들이 진솔한 가사로 대중의 마음을 사로잡으며 국민 밴드로 등극했습니다. 또한 시부야의 레코드 가게를 중심으로 한 '시부야계'와 X JAPAN이 이끈 '비주얼 록' 등 독창적인 서브컬처가 주류 음악계에 큰 영향을 미치며 장르적 다양성을 폭발시켰습니다. 90년대는 그야말로 일본 대중음악의 르네상스였습니다.
+                    </p>
+                </div>
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                    <div class="lg:col-span-2 bg-white p-6 rounded-lg shadow-md">
+                        <h3 class="text-xl font-bold mb-4">주요 아티스트</h3>
+                        <div id="artists-grid-1990s" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 mb-6"></div>
+                        <div id="artist-details-1990s" class="bg-stone-50 p-4 rounded-lg min-h-[250px] prose">
+                            <p class="text-stone-500 text-center flex items-center justify-center h-full">아티스트를 선택하여 상세 정보를 확인하세요.</p>
+                        </div>
+                    </div>
+                    <div class="bg-white p-6 rounded-lg shadow-md">
+                        <h3 class="text-xl font-bold mb-4 text-center">장르 스포트라이트</h3>
+                        <div class="chart-container h-64 md:h-auto">
+                            <canvas id="genreChart1990s"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            
+            <section id="2000s-section" class="content-section hidden">
+                <div class="bg-white p-6 rounded-lg shadow-md mb-8">
+                     <h2 class="text-3xl font-bold text-center mb-2">2000년대: 밴드 붐, 그리고 새로운 세대의 등장</h2>
+                    <p class="text-center text-stone-600 mb-6 max-w-4xl mx-auto prose">
+                        2000년대는 CD 시장의 점진적인 하락과 디지털 음원, MD(MiniDisc)의 등장으로 음악 소비 방식이 변화하기 시작한 과도기였습니다. 이러한 변화 속에서 90년대의 거대 프로듀서 중심 시스템에서 벗어나 아티스트 개개인의 개성과 음악성이 더욱 중요해졌습니다. 특히 'ROCK IN JAPAN FESTIVAL'과 같은 대형 록 페스티벌의 성장은 '밴드 붐'을 이끌었고, BUMP OF CHICKEN, ASIAN KUNG-FU GENERATION과 같은 밴드들이 젊은 세대의 목소리를 대변하며 큰 인기를 얻었습니다. 1999년 말 혜성처럼 등장한 우타다 히카루는 R&B를 기반으로 한 독보적인 음악성으로 J-POP의 새로운 시대를 열었으며, 시이나 링고는 독창적인 세계관으로 확고한 마니아층을 구축했습니다. 또한 키시단과 같은 개성 넘치는 밴드와 Rip Slyme과 같은 힙합 그룹이 메인스트림에서 성공하며 장르의 다변화를 이끌었습니다. 2000년대는 새로운 세대가 자신들의 목소리로 새로운 시대를 열었던 역동적인 시기였습니다.
+                    </p>
+                </div>
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                    <div class="lg:col-span-2 bg-white p-6 rounded-lg shadow-md">
+                        <h3 class="text-xl font-bold mb-4">주요 아티스트</h3>
+                        <div id="artists-grid-2000s" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 mb-6"></div>
+                        <div id="artist-details-2000s" class="bg-stone-50 p-4 rounded-lg min-h-[250px] prose">
+                            <p class="text-stone-500 text-center flex items-center justify-center h-full">아티스트를 선택하여 상세 정보를 확인하세요.</p>
+                        </div>
+                    </div>
+                    <div class="bg-white p-6 rounded-lg shadow-md">
+                        <h3 class="text-xl font-bold mb-4 text-center">장르 스포트라이트</h3>
+                        <div class="chart-container h-64 md:h-auto">
+                            <canvas id="genreChart2000s"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+        
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            
+            const musicData = {
+                artists: {
+                    '1980s': [
+                        { name: '오자키 유타카', bio: '<h4>시대의 저항아, 고뇌를 노래하다</h4><p>1983년 데뷔한 오자키 유타카는 10대의 순수한 열정과 기성세대에 대한 반항심을 직설적인 가사로 풀어내며 젊은 층의 폭발적인 지지를 얻었습니다. 학교와 사회의 억압 속에서 자유를 갈망하는 그의 노래들은 당시 청소년들의 성서와도 같았습니다. 카리스마 넘치는 라이브 퍼포먼스와 위태로운 매력으로 시대를 상징하는 아이콘이 되었지만, 1992년 26세의 나이로 요절하여 전설로 남았습니다. 그의 음악은 지금도 세대를 넘어 깊은 울림을 주고 있습니다.</p>', songs: ['I LOVE YOU', '卒業 (졸업)', '15の夜 (15의 밤)', '僕が僕であるために (내가 나이기 위해서)', 'シェリー (Shelly)'] },
+                        { name: '안전지대', bio: '<h4>아시아를 사로잡은 애절한 멜로디</h4><p>이노우에 요스이의 백밴드로 활동을 시작하여 1982년 데뷔한 록 밴드입니다. 보컬 타마키 코지의 독보적인 음색과 표현력을 바탕으로 한 애절한 록 발라드는 대중적으로 큰 성공을 거두었습니다. 특히 \'ワインレッドの心(와인레드의 마음)\'은 공전의 히트를 기록하며 이들을 톱스타의 반열에 올렸습니다. 이들의 음악은 홍콩, 대만 등 아시아 전역으로 퍼져나가 수많은 곡들이 번안되어 불리며 J-POP의 세계화를 이끈 선구자적 역할을 했습니다.</p>', songs: ['ワインレッドの心 (와인레드의 마음)', '悲しみにさよなら (슬픔이여 안녕)', '恋の予感 (사랑의 예감)', 'Friend'] },
+                        { name: '야마시타 타츠로', bio: '<h4>시티팝의 제왕, 완벽주의 사운드 장인</h4><p>70년대 밴드 \'슈가 베이브\' 시절부터 활동해온 일본 음악계의 거장입니다. 80년대에 들어 솔로 아티스트로서 전성기를 맞이했으며, 펑크(Funk)와 소울에 기반한 리드미컬하고 세련된 사운드로 \'시티팝\' 장르를 정립하고 이끌었습니다. 모든 악기를 직접 연주하고 녹음하는 완벽주의자로 유명하며, 그의 앨범들은 시대를 초월한 사운드 퀄리티를 자랑합니다. 여름과 드라이브의 상징과도 같은 그의 음악은 현재 전 세계적인 시티팝 리바이벌의 중심에 서 있습니다.</p>', songs: ['RIDE ON TIME', 'SPARKLE', '高気圧ガール (고기압 걸)', 'クリスマス・イブ (크리스마스 이브)'] },
+                        { name: '사잔 올 스타즈', bio: '<h4>일본의 국민 밴드, 유쾌함과 깊이를 아우르다</h4><p>1978년 데뷔 이래 40년 이상 일본 대중음악의 최정상에 군림하고 있는 밴드입니다. 보컬 쿠와타 케이스케의 독특한 창법과 재치 넘치는 가사, 그리고 록, 팝, 라틴, 트로트 등 장르를 자유자재로 넘나드는 폭넓은 음악성으로 전 세대의 사랑을 받고 있습니다. 80년대에는 \'いとしのエリー(사랑스러운 엘리)\'와 같은 불후의 명곡을 발표하며 국민 밴드로서의 입지를 굳혔습니다. 이들의 음악은 일본인의 삶의 희로애락 그 자체라고 평가받습니다.</p>', songs: ['いとしのエリー (사랑스러운 엘리)', '真夏の果実 (한여름의 과실)', 'チャコの海岸物語 (챠코의 해안 이야기)', 'TSUNAMI'] },
+                        { name: 'BOØWY', bio: '<h4>일본 록 씬을 바꾼 전설의 밴드</h4><p>1982년 데뷔하여 단 6년간의 짧은 활동 기간에도 불구하고 일본 록 역사에 지대한 영향을 끼친 밴드입니다. 히무로 교스케의 카리스마 넘치는 보컬과 호테이 토모야스의 엣지 있는 기타 리프가 결합된 8비트의 직선적인 록 사운드는 당시 젊은이들을 열광시켰습니다. 이들의 성공은 이후 90년대에 폭발하는 \'밴드 붐\'의 직접적인 기폭제가 되었으며, 해체 이후에도 멤버들은 각자의 활동을 통해 일본 음악계에 큰 족적을 남겼습니다.</p>', songs: ['MARIONETTE', 'B・BLUE', 'ONLY YOU', 'DREAMIN\''] }
+                    ],
+                    '1990s': [
+                        { name: 'Original Love', bio: '<h4>시부야계의 선구자, 도시적 감성의 정수</h4><p>90년대 초, 도쿄 시부야의 레코드 가게를 중심으로 유행한 \'시부야계\' 음악을 대표하는 아티스트입니다. 보컬 타지마 타카오를 중심으로 결성되었으며, 소울, 재즈, 펑크(Funk) 등 블랙 뮤직에 기반한 자유롭고 세련된 사운드를 선보였습니다. 특히 대표곡 \'接吻 (입맞춤) -kiss-\'는 특유의 그루브와 낭만적인 분위기로 시대를 초월한 명곡으로 평가받습니다. 그의 음악은 도시 생활의 고독함과 사랑을 감각적으로 그려내며 90년대 젊은이들의 감성을 대변했습니다.</p>', songs: ['接吻 (입맞춤) -kiss-', 'プライマル (프라이멀)', '朝日のあたる道 (아침 해가 비추는 길)', '月の裏で会いましょう (달의 뒷편에서 만납시다)'] },
+                        { name: 'Mr.Children', bio: '<h4>시대의 아픔을 보듬은 국민 밴드</h4><p>사쿠라이 카즈토시의 철학적인 가사와 서정적인 멜로디를 무기로 90년대 J-POP의 정점에 선 밴드입니다. 사회 비판적인 메시지부터 일상적인 사랑 노래까지 폭넓은 주제를 다루며 대중과 평단의 찬사를 동시에 받았습니다. 특히 1994년 발매된 앨범 [Atomic Heart]는 340만 장 이상 판매되었으며, \'Tomorrow never knows\', \'innocent world\' 등 수많은 명곡을 통해 \'미스치루 현상\'이라는 사회적 신드롬을 일으켰습니다. 이들은 90년대 일본 사회의 빛과 그림자를 가장 잘 표현한 아티스트로 평가받습니다.</p>', songs: ['Tomorrow never knows', 'innocent world', '名もなき詩 (이름 없는 시)', '終わりなき旅 (끝없는 여행)', 'CROSS ROAD'] },
+                        { name: 'X JAPAN', bio: '<h4>비주얼 록의 창시자, 격정과 비극의 서사</h4><p>\'비주얼 록\'이라는 장르를 창시하고 일본 대중문화에 거대한 충격을 안겨준 전설적인 밴드입니다. 리더 YOSHIKI의 클래식 기반의 드라마틱한 곡 구성, 보컬 TOSHI의 처절한 미성, 그리고 멤버들의 화려하고 파격적인 비주얼은 거대한 팬덤을 형성했습니다. 격렬한 스피드 메탈부터 눈물 없이는 들을 수 없는 발라드까지 극단적인 음악 스타일을 넘나들며 자신들만의 세계를 구축했습니다. 1997년 해체와 멤버의 죽음 등 비극적인 서사까지 더해져 이들은 단순한 밴드를 넘어 하나의 신화가 되었습니다.</p>', songs: ['Endless Rain', '紅 (쿠레나이)', 'Tears', 'Forever Love', 'Say Anything'] },
+                        { name: 'ZARD', bio: '<h4>얼굴 없는 가수, 희망을 노래하다</h4><p>보컬 사카이 이즈미의 1인 프로젝트로, 방송 출연을 거의 하지 않는 신비주의 전략으로도 유명합니다. 사카이 이즈미가 직접 쓴 희망적이고 공감대 높은 가사와 그녀의 청량한 목소리는 버블 붕괴 이후 힘든 시기를 보내던 일본인들에게 큰 위로를 주었습니다. 특히 \'負けないで(지지말아요)\'는 일본을 대표하는 응원가로 자리 잡았으며, 애니메이션 \'슬램덩크\', \'드래곤볼 GT\' 등의 주제가를 불러 폭넓은 인지도를 얻었습니다. 그녀의 음악은 90년대의 긍정적인 에너지를 상징합니다.</p>', songs: ['負けないで (지지말아요)', '揺れる想い (흔들리는 마음)', 'マイ フレンド (마이 프렌드)', '心を開いて (마음을 열고)', 'Don\'t you see!'] },
+                        { name: 'SPITZ', bio: '<h4>일상 속의 판타지를 노래하는 밴드</h4><p>보컬 쿠사노 마사무네의 독특한 미성과 문학적인 가사로 90년대 중반부터 꾸준한 인기를 얻고 있는 밴드입니다. 얼핏 듣기에는 상쾌한 팝 록처럼 들리지만, 가사 속에는 삶과 죽음, 성(性)에 대한 은유가 숨어 있어 깊은 해석의 여지를 남깁니다. 1995년 발매된 \'ロビンソン(로빈슨)\'의 대히트로 톱 밴드의 반열에 올랐으며, 자극적이지 않으면서도 보편적인 감성을 노래하며 자신들만의 독자적인 영역을 구축했습니다.</p>', songs: ['ロビンソン (로빈슨)', '空も飛べるはず (하늘도 날 수 있을 거야)', 'チェリー (체리)', '楓 (단풍나무)'] }
+                    ],
+                    '2000s': [
+                        { name: '키시단', bio: '<h4>낭만과 웃음의 불량학생 록</h4><p>80년대 일본의 불량학생(양키) 문화를 컨셉으로 한 독특한 록 밴드입니다. 리젠트 헤어스타일과 긴 교복(가쿠란) 차림으로 무대에 올라 유쾌하고 열정적인 라이브 퍼포먼스를 선보입니다. 복고풍의 사운드와 중독성 강한 멜로디, 그리고 우정을 강조하는 가사로 2000년대 초반 \'One Night Carnival\' 신드롬을 일으키며 큰 인기를 끌었습니다. 단순한 코믹 밴드를 넘어, 사라져가는 낭만을 노래하며 많은 이들의 향수를 자극했습니다.</p>', songs: ['One Night Carnival', '結婚闘魂行進曲「マブダチ」', 'SUPER BOY FRIEND', '愛 羅 武 勇 (I LOVE YOU)'] },
+                        { name: 'BUMP OF CHICKEN', bio: '<h4>리스너들의 마지막 보루, 문학적 록</h4><p>보컬 후지와라 모토오가 쓰는 한 편의 시와 같은 섬세하고 문학적인 가사로 젊은 세대의 내면을 파고들며 절대적인 지지를 받는 록 밴드입니다. 사회와 인간관계에 대한 깊이 있는 통찰을 담은 노래들은 \'리스너들의 마지막 보루\'라 불리며 두터운 팬층을 확보했습니다. 대표곡 \'天体観測(천체관측)\'은 2000년대 밴드 붐을 상징하는 곡이 되었으며, 애니메이션, 게임 등 서브컬처와의 성공적인 협업을 통해 대중적인 인지도까지 얻었습니다.</p>', songs: ['天体観測 (천체관측)', 'カルマ (카르마)', 'sailing day', 'ray', '花の名 (꽃의 이름)'] },
+                        { name: '우타다 히카루', bio: '<h4>J-POP의 패러다임을 바꾼 천재 싱어송라이터</h4><p>1998년 말, 15세의 나이로 데뷔하여 일본 음악계를 송두리째 뒤흔든 아티스트입니다. 미국 생활 경험을 바탕으로 한 유창한 영어 발음과 본고장의 R&B를 완벽하게 소화한 그녀의 음악은 당시 J-POP 씬에 큰 충격을 주었습니다. 데뷔 앨범 [First Love]는 765만 장 이상 판매되며 일본 역사상 가장 많이 팔린 앨범으로 기록되었습니다. 그녀의 등장은 일본 음악 시장의 중심을 아이돌과 밴드에서 여성 싱어송라이터로 이동시키는 계기가 되었습니다.</p>', songs: ['First Love', 'Automatic', 'Flavor Of Life', '光 (빛)', 'Can You Keep A Secret?'] },
+                        { name: '시이나 링고', bio: '<h4>독창적 세계관의 카리스마 퀸</h4><p>데뷔 초 \'가부키쵸의 여왕\'이라는 파격적인 컨셉과 특유의 병적인 미학으로 씬에 큰 충격을 안겨준 아티스트입니다. 록, 재즈, 펑크(Funk), 심지어 일본 전통 가요(엔카)까지 장르를 넘나드는 예측 불가능한 음악과 문어체를 사용한 독특한 가사로 자신만의 확고한 세계관을 구축했습니다. 2004년부터는 밴드 \'도쿄지헨(東京事変)\'을 결성하여 또 다른 음악적 실험을 이어갔습니다. 그녀는 2000년대 일본의 가장 독창적이고 영향력 있는 아티스트 중 한 명으로 평가받습니다.</p>', songs: ['歌舞伎町の女王 (가부키쵸의 여왕)', '本能 (본능)', '丸の内サディスティック (마루노우치 새디스틱)', 'ギブス (깁스)'] },
+                        { name: 'Rip Slyme', bio: '<h4>힙합을 메인스트림으로 이끈 유쾌한 그룹</h4><p>2명의 MC와 1명의 DJ라는 전통적인 힙합 구성에 2명의 추가 MC를 더한 독특한 5인조 힙합 그룹입니다. 힙합의 무거운 이미지 대신, 팝적이고 경쾌한 사운드와 일상적인 소재를 다룬 재치 있는 가사로 대중적인 인기를 얻었습니다. 2001년 발표한 \'STEPPER\'S DELIGHT\'의 성공을 시작으로, \'楽園ベイベー(낙원 베이베)\' 등의 히트곡을 내며 힙합이라는 장르를 일본 음악 시장의 주류로 끌어올리는 데 결정적인 역할을 했습니다.</p>', songs: ['STEPPER\'S DELIGHT', '楽園ベイベー (낙원 베이베)', 'One', 'JOINT'] }
+                    ]
+                },
+                genreData: {
+                    overview: {
+                        labels: ['1980년대', '1990년대', '2000년대'],
+                        datasets: [
+                            { label: '시티팝/AOR', data: [40, 10, 5], backgroundColor: '#7DD3FC' },
+                            { label: '아이돌 팝', data: [30, 20, 15], backgroundColor: '#F472B6' },
+                            { label: '록', data: [15, 35, 40], backgroundColor: '#F87171' },
+                            { label: '팝/발라드', data: [15, 30, 25], backgroundColor: '#818CF8' },
+                            { label: 'R&B/힙합', data: [0, 5, 15], backgroundColor: '#FBBF24' },
+                        ]
+                    },
+                    '1980s': {
+                        labels: ['시티팝', '아이돌 팝', '록', '팝/발라드'],
+                        datasets: [{ data: [45, 30, 15, 10], backgroundColor: ['#7DD3FC', '#F472B6', '#F87171', '#818CF8'] }]
+                    },
+                    '1990s': {
+                        labels: ['J-POP', '록', '시부야계', '비주얼 록'],
+                        datasets: [{ data: [40, 30, 15, 15], backgroundColor: ['#818CF8', '#F87171', '#34D399', '#A78BFA'] }]
+                    },
+                    '2000s': {
+                        labels: ['J-ROCK', 'J-POP', 'R&B/힙합', '아이돌'],
+                        datasets: [{ data: [45, 25, 15, 15], backgroundColor: ['#F87171', '#818CF8', '#FBBF24', '#F472B6'] }]
+                    }
+                }
+            };
+            
+            let charts = {};
+            const navButtons = document.querySelectorAll('.nav-btn');
+            const contentSections = document.querySelectorAll('.content-section');
+
+            function setActiveNav(sectionId) {
+                navButtons.forEach(btn => {
+                    if (btn.dataset.section === sectionId) {
+                        btn.classList.add('active');
+                    } else {
+                        btn.classList.remove('active');
+                    }
+                });
+            }
+
+            function showSection(sectionId) {
+                contentSections.forEach(section => {
+                    if (section.id === `${sectionId}-section`) {
+                        section.classList.remove('hidden');
+                    } else {
+                        section.classList.add('hidden');
+                    }
+                });
+                setActiveNav(sectionId);
+            }
+
+            function createChart(chartId, type, data, options = {}) {
+                if (charts[chartId]) {
+                    charts[chartId].destroy();
+                }
+                const ctx = document.getElementById(chartId).getContext('2d');
+                charts[chartId] = new Chart(ctx, { type, data, options });
+            }
+
+            function initOverviewChart() {
+                const options = {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        x: { stacked: true },
+                        y: { stacked: true, beginAtZero: true, ticks: { callback: value => value + '%' } }
+                    },
+                    plugins: {
+                        tooltip: { callbacks: { label: (context) => `${context.dataset.label}: ${context.raw}%` } }
+                    }
+                };
+                createChart('overviewChart', 'bar', musicData.genreData.overview, options);
+            }
+            
+            function initDecadeChart(decade) {
+                const options = {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'bottom' },
+                        tooltip: { callbacks: { label: (context) => `${context.label}: ${context.raw}%` } }
+                    }
+                };
+                createChart(`genreChart${decade}`, 'doughnut', musicData.genreData[decade], options);
+            }
+
+            function populateArtists(decade) {
+                const grid = document.getElementById(`artists-grid-${decade}`);
+                const detailsPanel = document.getElementById(`artist-details-${decade}`);
+                grid.innerHTML = '';
+                musicData.artists[decade].forEach(artist => {
+                    const card = document.createElement('div');
+                    card.className = 'artist-card bg-stone-100 p-3 rounded-lg text-center font-medium border-2 border-transparent';
+                    card.textContent = artist.name;
+                    card.dataset.artistName = artist.name;
+                    card.addEventListener('click', () => {
+                        showArtistDetails(decade, artist.name);
+                    });
+                    grid.appendChild(card);
+                });
+                 detailsPanel.innerHTML = `<p class="text-stone-500 text-center flex items-center justify-center h-full">아티스트를 선택하여 상세 정보를 확인하세요.</p>`;
+            }
+            
+            function showArtistDetails(decade, artistName) {
+                const artist = musicData.artists[decade].find(a => a.name === artistName);
+                if (!artist) return;
+                
+                const detailsPanel = document.getElementById(`artist-details-${decade}`);
+                detailsPanel.innerHTML = `
+                    <div class="prose">
+                        ${artist.bio}
+                        <h4 class="font-semibold text-stone-700 mt-4">대표곡</h4>
+                        <ul class="list-disc list-inside text-stone-600">
+                            ${artist.songs.map(song => `<li>${song}</li>`).join('')}
+                        </ul>
+                    </div>
+                `;
+
+                const cards = document.querySelectorAll(`#artists-grid-${decade} .artist-card`);
+                cards.forEach(card => {
+                    if (card.dataset.artistName === artistName) {
+                        card.classList.add('active');
+                    } else {
+                        card.classList.remove('active');
+                    }
+                });
+            }
+
+            navButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    const sectionId = button.dataset.section;
+                    showSection(sectionId);
+                });
+            });
+
+            function initialize() {
+                showSection('overview');
+                initOverviewChart();
+                ['1980s', '1990s', '2000s'].forEach(decade => {
+                    populateArtists(decade);
+                    initDecadeChart(decade);
+                });
+            }
+
+            initialize();
+        });
+    </script>
+</body>
+</html>
+
