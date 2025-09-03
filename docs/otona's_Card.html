@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>어른의 카드 심층 연구 보고서</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Kivotos Clarity -->
+    <!-- Application Structure Plan: A thematic, non-linear dashboard with sidebar navigation. Sections cover the card's surface meaning, a deep thematic analysis, a case study on the Final Volume, and a conclusion. This structure allows users to explore the complex topic at their own pace, moving from simple to abstract concepts. Interactions like tabs and expandable timelines are chosen to make dense textual analysis more digestible and engaging. -->
+    <!-- Visualization & Content Choices: 1. Card's meaning breakdown -> Goal: Compare/Inform -> Viz: Doughnut Chart -> Interaction: Hover tooltips -> Justification: Visually represents the conceptual weight of different themes (responsibility vs. money) -> Library: Chart.js/Canvas. 2. Final Volume Events -> Goal: Show change/process -> Viz: Interactive Vertical Timeline -> Interaction: Click to expand event details -> Justification: Presents the narrative climax chronologically and interactively -> Library: HTML/CSS/JS. 3. Thematic Analysis -> Goal: Organize -> Viz: Tabbed content -> Interaction: Click to switch between themes -> Justification: Breaks down the core analysis into manageable parts -> Library: HTML/CSS/JS. -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Noto Sans KR', sans-serif;
+            background-color: #f9fafb;
+            color: #374151;
+        }
+        .content-section {
+            display: none;
+        }
+        .content-section.active {
+            display: block;
+        }
+        .nav-link {
+            transition: all 0.2s ease-in-out;
+        }
+        .nav-link.active {
+            background-color: #e5e7eb;
+            color: #1e40af;
+            border-right: 3px solid #1e40af;
+        }
+        .nav-link:hover {
+            background-color: #f3f4f6;
+        }
+        .card {
+            background-color: white;
+            border-radius: 0.75rem;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+        }
+        .tab-button {
+            transition: all 0.2s ease;
+        }
+        .tab-button.active {
+            border-bottom-color: #1e40af;
+            color: #1e40af;
+        }
+        .tab-content {
+            display: none;
+        }
+        .tab-content.active {
+            display: block;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 400px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 400px;
+            max-height: 400px;
+        }
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            left: -1.375rem;
+            top: 0.25rem;
+            width: 1rem;
+            height: 1rem;
+            background-color: #1e40af;
+            border-radius: 50%;
+            border: 2px solid #f9fafb;
+        }
+        .fade-in {
+            animation: fadeIn 0.5s ease-in-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body class="antialiased">
+    <div class="flex h-screen bg-gray-50">
+        <aside class="w-64 bg-white shadow-lg hidden md:block">
+            <div class="p-6">
+                <h1 class="text-xl font-bold text-blue-800">어른의 카드</h1>
+                <p class="text-sm text-gray-500">심층 의미 분석</p>
+            </div>
+            <nav id="desktop-nav" class="mt-6">
+                <a href="#introduction" class="nav-link active flex items-center px-6 py-3 text-gray-700">
+                    <span class="mx-3">서론</span>
+                </a>
+                <a href="#analysis" class="nav-link flex items-center px-6 py-3 text-gray-700">
+                    <span class="mx-3">상징적 의미 분석</span>
+                </a>
+                <a href="#casestudy" class="nav-link flex items-center px-6 py-3 text-gray-700">
+                    <span class="mx-3">사례 연구: 최종편</span>
+                </a>
+                <a href="#conclusion" class="nav-link flex items-center px-6 py-3 text-gray-700">
+                    <span class="mx-3">결론</span>
+                </a>
+            </nav>
+        </aside>
+
+        <div class="flex-1 flex flex-col overflow-hidden">
+            <header class="flex justify-between items-center p-4 bg-white border-b-2 md:border-b-0">
+                <div class="md:hidden">
+                    <h1 class="text-xl font-bold text-blue-800">어른의 카드 분석</h1>
+                </div>
+                <button id="mobile-menu-button" class="text-gray-500 focus:outline-none md:hidden">
+                    <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7" />
+                    </svg>
+                </button>
+            </header>
+            
+            <div id="mobile-nav" class="hidden md:hidden bg-white border-b">
+                <a href="#introduction" class="block py-2 px-4 text-sm text-gray-700 hover:bg-gray-200">서론</a>
+                <a href="#analysis" class="block py-2 px-4 text-sm text-gray-700 hover:bg-gray-200">상징적 의미 분석</a>
+                <a href="#casestudy" class="block py-2 px-4 text-sm text-gray-700 hover:bg-gray-200">사례 연구: 최종편</a>
+                <a href="#conclusion" class="block py-2 px-4 text-sm text-gray-700 hover:bg-gray-200">결론</a>
+            </div>
+
+            <main class="flex-1 overflow-x-hidden overflow-y-auto bg-gray-50 p-4 md:p-8">
+                <div id="content-container">
+                    <section id="introduction" class="content-section active fade-in">
+                        <h2 class="text-3xl font-bold text-gray-800 mb-2">서론: 단순한 결제 수단을 넘어서</h2>
+                        <p class="text-gray-600 mb-8">'블루 아카이브'의 선생이 사용하는 '어른의 카드'는 작중에서 단순한 금융 수단 이상의 깊은 의미를 지니는 상징적인 오브제입니다. 많은 이들이 표면적으로는 선생의 재력을 나타내는 신용카드로 인식하지만, 그 본질은 '어른'으로서 짊어져야 할 책임과 각오를 형상화한 것입니다. 이 보고서는 카드의 다층적인 의미를 분석하여 그 진정한 가치를 탐구합니다.</p>
+                        
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div class="card p-6 border-l-4 border-gray-300">
+                                <h3 class="text-lg font-bold text-gray-700">표면적 의미: 만능 신용카드</h3>
+                                <p class="mt-2 text-gray-600">작중에서 파괴된 기물 파손 비용을 결제하거나, 학생들을 위한 물품을 구매하는 등 실제 금전적 거래에 사용됩니다. 이는 선생이 가진 최소한의 '어른의 재력'을 상징합니다.</p>
+                            </div>
+                            <div class="card p-6 border-l-4 border-blue-800">
+                                <h3 class="text-lg font-bold text-blue-800">내포된 의미: 책임의 증표</h3>
+                                <p class="mt-2 text-gray-600">학생들이 해결할 수 없는 문제, 그들이 저지른 실수, 그리고 그로 인해 발생하는 모든 결과를 선생이 '어른'으로서 책임지겠다는 의지의 물리적 표현입니다.</p>
+                            </div>
+                        </div>
+
+                         <div class="card mt-8 p-6">
+                            <h3 class="text-xl font-bold mb-4">연구의 목적</h3>
+                            <p class="text-gray-700">'어른의 카드'는 '블루 아카이브'의 핵심 주제인 '어른의 역할과 책임'을 관통하는 중요한 매개체입니다. 본 연구는 이 카드가 사용되는 다양한 맥락을 분석하고, 그 상징성을 시각화하여 선생이라는 캐릭터와 게임의 서사를 더 깊이 이해하는 것을 목표로 합니다. 카드를 긁는 행위가 단순한 소비가 아닌, 어떠한 의미를 지니는 '결단'인지 밝혀내고자 합니다.</p>
+                        </div>
+                    </section>
+
+                    <section id="analysis" class="content-section fade-in">
+                        <h2 class="text-3xl font-bold text-gray-800 mb-2">상징적 의미의 다층적 분석</h2>
+                        <p class="text-gray-600 mb-8">'어른의 카드'는 여러 상징적 의미가 복합적으로 얽혀 있습니다. 이 섹션에서는 카드의 핵심 가치를 세 가지 테마로 나누어 분석하고, 각 의미가 차지하는 비중을 시각적으로 표현합니다. 아래 탭을 클릭하여 각 테마에 대한 상세한 설명을 확인하세요.</p>
+                        
+                        <div class="card p-6 md:p-8">
+                           <div class="flex flex-col md:flex-row gap-8">
+                                <div class="w-full md:w-1/2">
+                                     <div class="border-b border-gray-200">
+                                        <nav class="-mb-px flex space-x-6" aria-label="Tabs">
+                                            <button class="tab-button active whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm" data-tab="responsibility">책임</button>
+                                            <button class="tab-button whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm text-gray-500 hover:text-gray-700 hover:border-gray-300" data-tab="power">수호</button>
+                                            <button class="tab-button whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm text-gray-500 hover:text-gray-700 hover:border-gray-300" data-tab="sacrifice">희생</button>
+                                        </nav>
+                                    </div>
+                                    <div class="mt-4 min-h-[250px]">
+                                        <div id="responsibility-content" class="tab-content active">
+                                            <h3 class="text-xl font-bold text-gray-800">테마 1: 책임의 무게</h3>
+                                            <p class="mt-2 text-gray-700">카드의 가장 근본적인 의미입니다. 학생들의 세계는 실수와 실패가 용납되는 성장의 공간이지만, 그 결과가 때로는 감당할 수 없는 파국으로 이어질 수 있습니다. 이때 선생은 '어른의 카드'를 사용함으로써 "이 모든 결과는 내가 책임진다"는 선언을 합니다. 이는 금전적 책임을 넘어, 학생들의 미래와 선택에 대한 도덕적, 윤리적 책임을 모두 짊어지겠다는 강력한 의지의 표명입니다.</p>
+                                        </div>
+                                        <div id="power-content" class="tab-content">
+                                            <h3 class="text-xl font-bold text-gray-800">테마 2: 학생을 지키는 힘</h3>
+                                            <p class="mt-2 text-gray-700">선생은 키보토스의 유일한 '어른'으로서 학생들을 외부의 위협과 부조리로부터 보호할 의무가 있습니다. '어른의 카드'는 이 의무를 수행하기 위한 실질적인 힘을 상징합니다. 이는 단순히 문제를 돈으로 해결하는 것을 넘어, 학생들의 순수함과 가능성을 지키기 위해 어른의 세계에 존재하는 '규칙'과 '수단'을 사용함을 의미합니다. 학생들의 손을 더럽히지 않고, 모든 궂은일을 도맡아 처리하는 방패와 같은 역할입니다.</p>
+                                        </div>
+                                        <div id="sacrifice-content" class="tab-content">
+                                            <h3 class="text-xl font-bold text-gray-800">테마 3: 희생과 각오</h3>
+                                            <p class="mt-2 text-gray-700">카드를 사용하는 행위는 선생 개인에게 어떤 대가가 따를지 모르는 '희생'을 감수하는 것입니다. 특히 최종편에서 드러나듯, 이는 자신의 안위나 미래를 담보로 학생들의 기적을 만들어내는 행위와 같습니다. 즉, '어른의 카드' 사용은 단순한 문제 해결이 아니라, 학생들의 미래를 위해 자신의 모든 것을 내던질 수 있다는 비장한 '각오'의 표현입니다. 이 카드는 선생의 마지막 보루이자 최후의 수단입니다.</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="w-full md:w-1/2 flex items-center justify-center">
+                                    <div class="chart-container">
+                                        <canvas id="meaningChart"></canvas>
+                                    </div>
+                                </div>
+                           </div>
+                        </div>
+                    </section>
+
+                    <section id="casestudy" class="content-section fade-in">
+                        <h2 class="text-3xl font-bold text-gray-800 mb-2">사례 연구: 최종편 "모든 기적이 시작되는 곳"</h2>
+                        <p class="text-gray-600 mb-8">최종편에서 '어른의 카드'의 상징성은 극대화됩니다. 이는 단순한 아이템을 넘어, 선생이 자신의 모든 것을 걸고 학생들과 키보토스의 운명에 맞서는 결정적인 도구로 사용됩니다. 아래 타임라인의 각 항목을 클릭하여 카드 사용의 의미를 단계별로 확인해 보세요.</p>
+                        <div class="card p-6 md:p-8">
+                            <div class="relative border-l-2 border-gray-300 ml-4">
+                                <div class="timeline-item mb-8 ml-8 cursor-pointer" data-case="1">
+                                    <h3 class="text-lg font-bold text-blue-800">프레나파테스와의 대면</h3>
+                                    <time class="text-sm font-normal leading-none text-gray-500">결단의 시작</time>
+                                    <div class="case-details hidden mt-2 text-gray-700 bg-gray-50 p-4 rounded-md">
+                                        <p>다른 세계의 '실패한 자신'인 프레나파테스와 마주한 선생. 그는 학생들을 믿지 못하고 모든 것을 혼자 짊어지려다 파멸했습니다. 여기서 '어른의 카드'를 사용한다는 것은, 단순히 책임을 지는 것을 넘어 학생들을 끝까지 믿고 그들의 가능성을 위해 자신의 모든 것을 걸겠다는 '올바른 어른'으로서의 길을 선택하는 첫걸음입니다.</p>
+                                    </div>
+                                </div>
+                                <div class="timeline-item mb-8 ml-8 cursor-pointer" data-case="2">
+                                    <h3 class="text-lg font-bold text-blue-800">총학생회장 대행의 경고</h3>
+                                    <time class="text-sm font-normal leading-none text-gray-500">대가의 인지</time>
+                                    <div class="case-details hidden mt-2 text-gray-700 bg-gray-50 p-4 rounded-md">
+                                        <p>총학생회장 대행은 선생에게 '어른의 카드' 사용의 대가로 "모든 책임을 지고 키보토스에서 떠나야 할 수도 있다"고 경고합니다. 이는 카드의 사용이 선생 개인의 존재 자체를 위협하는 거대한 희생임을 명확히 보여주는 장면입니다. 그럼에도 선생은 주저 없이 카드를 사용할 각오를 다집니다.</p>
+                                    </div>
+                                </div>
+                                <div class="timeline-item ml-8 cursor-pointer" data-case="3">
+                                    <h3 class="text-lg font-bold text-blue-800">최후의 사용</h3>
+                                    <time class="text-sm font-normal leading-none text-gray-500">기적의 증명</time>
+                                    <div class="case-details hidden mt-2 text-gray-700 bg-gray-50 p-4 rounded-md">
+                                        <p>색채에 잠식된 시로코 테러를 막기 위한 마지막 순간, 선생은 '어른의 카드'를 사용하여 모든 책임을 자신에게 돌리고, 학생들의 힘으로 기적을 일으킬 수 있는 단 한 번의 기회를 만들어냅니다. 여기서 카드는 운명을 거스르고, 정해진 비극을 뒤엎는 '어른의 의지' 그 자체가 됩니다. 이는 희생을 감수한 책임감 있는 어른만이 아이들에게 기적을 선물할 수 있다는 작품의 핵심 메시지를 응축한 장면입니다.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+                    
+                    <section id="conclusion" class="content-section fade-in">
+                        <h2 class="text-3xl font-bold text-gray-800 mb-2">결론: 어른의 증표, 책임의 무게</h2>
+                        <p class="text-gray-600 mb-8">'어른의 카드'는 단순한 결제 수단이 아닌, '블루 아카이브'의 세계관과 주제 의식을 상징하는 핵심적인 장치입니다. 이는 선생이라는 캐릭터가 왜 '어른'이며, 그의 역할이 무엇인지를 명확하게 보여줍니다.</p>
+                        
+                        <div class="card p-8">
+                            <blockquote class="border-l-4 border-blue-800 pl-4">
+                                <p class="text-xl italic text-gray-800">"어른의 카드는 돈이 아니라 책임으로 긁는 것이다."</p>
+                            </blockquote>
+                            <p class="mt-6 text-gray-700">이 카드는 학생들의 실패를 감싸고, 그들의 미래를 열어주기 위해 자신의 모든 것을 내걸 수 있는 '어른의 각오'를 물리적으로 형상화한 것입니다. 카드를 사용하는 행위는 곧 선생이 학생들의 방패가 되어 모든 부조리와 맞서 싸우겠다는 선언과도 같습니다.</p>
+                            <p class="mt-4 text-gray-700">결론적으로, '어른의 카드'의 진정한 의미는 재력이 아닌 책임감, 힘이 아닌 보호 의지, 그리고 소비가 아닌 희생에 있습니다. 이는 키보토스라는 불안정한 세계 속에서 아이들을 올바른 길로 이끌어야 하는 모든 '어른'들이 지녀야 할 마음가짐의 증표라고 할 수 있습니다.</p>
+                        </div>
+                    </section>
+
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const contentContainer = document.getElementById('content-container');
+            const sections = document.querySelectorAll('.content-section');
+            const navLinks = document.querySelectorAll('.nav-link');
+            const mobileNavLinks = document.querySelectorAll('#mobile-nav a');
+            const mobileMenuButton = document.getElementById('mobile-menu-button');
+            const mobileNav = document.getElementById('mobile-nav');
+
+            const navigateTo = (hash) => {
+                const targetId = hash.substring(1);
+                const targetSection = document.getElementById(targetId);
+                
+                if (!targetSection) return;
+
+                sections.forEach(section => {
+                    section.classList.remove('active');
+                });
+
+                const newSection = document.getElementById(targetId);
+                if (newSection) {
+                    newSection.classList.add('active');
+                    contentContainer.scrollTop = 0;
+                }
+
+                navLinks.forEach(link => {
+                    if (link.getAttribute('href') === hash) {
+                        link.classList.add('active');
+                    } else {
+                        link.classList.remove('active');
+                    }
+                });
+                
+                if (window.innerWidth < 768) {
+                    mobileNav.classList.add('hidden');
+                }
+            };
+
+            const handleNavClick = (event) => {
+                event.preventDefault();
+                const hash = event.currentTarget.getAttribute('href');
+                window.location.hash = hash;
+            };
+
+            navLinks.forEach(link => {
+                link.addEventListener('click', handleNavClick);
+            });
+            mobileNavLinks.forEach(link => {
+                link.addEventListener('click', handleNavClick);
+            });
+            
+            mobileMenuButton.addEventListener('click', () => {
+                mobileNav.classList.toggle('hidden');
+            });
+            
+            window.addEventListener('hashchange', () => {
+                navigateTo(window.location.hash || '#introduction');
+            });
+            navigateTo(window.location.hash || '#introduction');
+
+            const tabButtons = document.querySelectorAll('.tab-button');
+            const tabContents = document.querySelectorAll('.tab-content');
+
+            tabButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    tabButtons.forEach(btn => btn.classList.remove('active'));
+                    button.classList.add('active');
+                    
+                    tabContents.forEach(content => content.classList.remove('active'));
+                    document.getElementById(button.dataset.tab + '-content').classList.add('active');
+                });
+            });
+            
+            const caseItems = document.querySelectorAll('.timeline-item');
+            caseItems.forEach(item => {
+                item.addEventListener('click', () => {
+                    const details = item.querySelector('.case-details');
+                    const isVisible = !details.classList.contains('hidden');
+                    
+                    document.querySelectorAll('.case-details').forEach(d => d.classList.add('hidden'));
+
+                    if (!isVisible) {
+                        details.classList.remove('hidden');
+                    }
+                });
+            });
+
+            const ctx = document.getElementById('meaningChart');
+            if(ctx) {
+                new Chart(ctx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['책임의 무게', '학생을 지키는 힘', '희생과 각오', '금전적 능력'],
+                        datasets: [{
+                            data: [50, 30, 15, 5],
+                            backgroundColor: [
+                                'rgba(30, 64, 175, 0.8)',
+                                'rgba(59, 130, 246, 0.8)',
+                                'rgba(147, 197, 253, 0.8)',
+                                'rgba(209, 213, 219, 0.8)'
+                            ],
+                            borderColor: [
+                                'rgba(30, 64, 175, 1)',
+                                'rgba(59, 130, 246, 1)',
+                                'rgba(147, 197, 253, 1)',
+                                'rgba(209, 213, 219, 1)'
+                            ],
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                position: 'bottom',
+                                labels: {
+                                    font: {
+                                      family: "'Noto Sans KR', sans-serif",
+                                      size: 14
+                                    }
+                                }
+                            },
+                            tooltip: {
+                                titleFont: {
+                                  family: "'Noto Sans KR', sans-serif"
+                                },
+                                bodyFont: {
+                                  family: "'Noto Sans KR', sans-serif"
+                                },
+                                callbacks: {
+                                    label: function(context) {
+                                        let label = context.label || '';
+                                        if (label) {
+                                            label += ': ';
+                                        }
+                                        if (context.parsed !== null) {
+                                            label += context.parsed + '%';
+                                        }
+                                        return label;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+        });
+    </script>
+</body>
+</html>
