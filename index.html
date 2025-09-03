@@ -1,9 +1,7 @@
-
 <!DOCTYPE html>
-<html lang="ko">
-<head>
+<html lang="ko"><head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale-1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gemini Deep Research Curation</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet">
@@ -12,128 +10,151 @@
         .report-card { background-color: #FFFFFF; border: 1px solid #E9ECEF; border-radius: 12px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05); transition: transform 0.3s ease, box-shadow 0.3s ease; }
         .report-card:hover { transform: translateY(-5px); box-shadow: 0 12px 20px rgba(0, 0, 0, 0.1); }
         .report-card a { text-decoration: none; color: inherit; display: block; padding: 24px; }
-        .report-title { color: #212529; font-weight: 700; font-size: 1.25rem; }
-        .report-filename { color: #868E96; font-size: 0.875rem; margin-top: 8px; }
-        .report-date { color: #868E96; font-size: 0.875rem; white-space: nowrap; margin-left: 16px; }
+        .report-title { color: #212529; font-weight: 700; font-size: 1.1rem; line-height: 1.4; }
+        .report-filename { color: #868E96; font-size: 0.875rem; }
+        .report-date { color: #868E96; font-size: 0.875rem; white-space: nowrap; margin-left: 16px; padding-top: 2px; }
     </style>
 </head>
 <body class="antialiased text-gray-800">
-    <div class="container mx-auto p-4 md:p-8 max-w-4xl">
+    <div class="container mx-auto p-4 md:p-8 max-w-7xl">
         <header class="text-center mb-10">
             <h1 class="text-4xl md:text-5xl font-bold text-gray-800">Gemini Deep Research</h1>
             <p class="text-lg mt-2 text-gray-600">Gemini를 통해 생성된 리서치 보고서 모음 (최신순)</p>
         </header>
-        <main id="curation-list" class="space-y-6">
+        <main id="curation-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             
-            <div class="report-card">
-                <a href="docs/20250904-1.html">
-                    <div class="flex justify-between items-center">
-                        <h2 class="report-title">음식 취향 심층 분석 대시보드</h2>
-                        <span class="report-date">2025-09-03-05:03</span>
+            <div class="report-card flex flex-col">
+                <a href="docs/20250904-1.html" class="flex-grow flex flex-col">
+                    <div class="flex-grow">
+                        <div class="flex justify-between items-start">
+                            <h2 class="report-title">음식 취향 심층 분석 대시보드</h2>
+                            <span class="report-date">2025-09-03 05:03</span>
+                        </div>
+                        <p class="report-filename mt-2">20250904-1.html</p>
                     </div>
-                    <p class="report-filename">20250904-1.html</p>
                 </a>
             </div>
-            <div class="report-card">
-                <a href="docs/blueArchive.html">
-                    <div class="flex justify-between items-center">
-                        <h2 class="report-title">샬레(S.C.H.A.L.E.) 고찰 연구 보고서</h2>
-                        <span class="report-date">2025-09-03-04:59</span>
+            <div class="report-card flex flex-col">
+                <a href="docs/blueArchive.html" class="flex-grow flex flex-col">
+                    <div class="flex-grow">
+                        <div class="flex justify-between items-start">
+                            <h2 class="report-title">샬레(S.C.H.A.L.E.) 고찰 연구 보고서</h2>
+                            <span class="report-date">2025-09-03 04:59</span>
+                        </div>
+                        <p class="report-filename mt-2">blueArchive.html</p>
                     </div>
-                    <p class="report-filename">blueArchive.html</p>
                 </a>
             </div>
-            <div class="report-card">
-                <a href="docs/dancing-gemini-longchamp.html">
-                    <div class="flex justify-between items-center">
-                        <h2 class="report-title">카타르 물랭 드 롱샹 대상경주 상세 분석</h2>
-                        <span class="report-date">2025-09-02-14:35</span>
+            <div class="report-card flex flex-col">
+                <a href="docs/dancing-gemini-longchamp.html" class="flex-grow flex flex-col">
+                    <div class="flex-grow">
+                        <div class="flex justify-between items-start">
+                            <h2 class="report-title">카타르 물랭 드 롱샹 대상경주 상세 분석</h2>
+                            <span class="report-date">2025-09-02 14:35</span>
+                        </div>
+                        <p class="report-filename mt-2">dancing-gemini-longchamp.html</p>
                     </div>
-                    <p class="report-filename">dancing-gemini-longchamp.html</p>
                 </a>
             </div>
-            <div class="report-card">
-                <a href="docs/20250902-4.html">
-                    <div class="flex justify-between items-center">
-                        <h2 class="report-title">80년대-00년대 일본 음악 탐험</h2>
-                        <span class="report-date">2025-09-02-13:45</span>
+            <div class="report-card flex flex-col">
+                <a href="docs/20250902-4.html" class="flex-grow flex flex-col">
+                    <div class="flex-grow">
+                        <div class="flex justify-between items-start">
+                            <h2 class="report-title">80년대-00년대 일본 음악 탐험</h2>
+                            <span class="report-date">2025-09-02 13:45</span>
+                        </div>
+                        <p class="report-filename mt-2">20250902-4.html</p>
                     </div>
-                    <p class="report-filename">20250902-4.html</p>
                 </a>
             </div>
-            <div class="report-card">
-                <a href="docs/int'l-stakes-2025.html">
-                    <div class="flex justify-between items-center">
-                        <h2 class="report-title">2025 인터내셔널 스테이크스 분석: 예측과 결과</h2>
-                        <span class="report-date">2025-09-02-13:38</span>
+            <div class="report-card flex flex-col">
+                <a href="docs/int'l-stakes-2025.html" class="flex-grow flex flex-col">
+                    <div class="flex-grow">
+                        <div class="flex justify-between items-start">
+                            <h2 class="report-title">2025 인터내셔널 스테이크스 분석: 예측과 결과</h2>
+                            <span class="report-date">2025-09-02 13:38</span>
+                        </div>
+                        <p class="report-filename mt-2">int'l-stakes-2025.html</p>
                     </div>
-                    <p class="report-filename">int'l-stakes-2025.html</p>
                 </a>
             </div>
-            <div class="report-card">
-                <a href="docs/zutomayo.html">
-                    <div class="flex justify-between items-center">
-                        <h2 class="report-title">ZUTOMAYO: 종합 심층 분석 리포트</h2>
-                        <span class="report-date">2025-09-02-13:30</span>
+            <div class="report-card flex flex-col">
+                <a href="docs/zutomayo.html" class="flex-grow flex flex-col">
+                    <div class="flex-grow">
+                        <div class="flex justify-between items-start">
+                            <h2 class="report-title">ZUTOMAYO: 종합 심층 분석 리포트</h2>
+                            <span class="report-date">2025-09-02 13:30</span>
+                        </div>
+                        <p class="report-filename mt-2">zutomayo.html</p>
                     </div>
-                    <p class="report-filename">zutomayo.html</p>
                 </a>
             </div>
-            <div class="report-card">
-                <a href="docs/wakgood.html">
-                    <div class="flex justify-between items-center">
-                        <h2 class="report-title">이세계 아이돌 & 우왁굳: 저작권과 팬덤 문화 심층 분석</h2>
-                        <span class="report-date">2025-09-02-13:23</span>
+            <div class="report-card flex flex-col">
+                <a href="docs/wakgood.html" class="flex-grow flex flex-col">
+                    <div class="flex-grow">
+                        <div class="flex justify-between items-start">
+                            <h2 class="report-title">이세계 아이돌 & 우왁굳: 저작권과 팬덤 문화 심층 분석</h2>
+                            <span class="report-date">2025-09-02 13:23</span>
+                        </div>
+                        <p class="report-filename mt-2">wakgood.html</p>
                     </div>
-                    <p class="report-filename">wakgood.html</p>
                 </a>
             </div>
-            <div class="report-card">
-                <a href="docs/20250902-3.html">
-                    <div class="flex justify-between items-center">
-                        <h2 class="report-title">PS5 Pro 가격 논쟁: 한일 비교 분석</h2>
-                        <span class="report-date">2025-09-02-13:01</span>
+            <div class="report-card flex flex-col">
+                <a href="docs/20250902-3.html" class="flex-grow flex flex-col">
+                    <div class="flex-grow">
+                        <div class="flex justify-between items-start">
+                            <h2 class="report-title">PS5 Pro 가격 논쟁: 한일 비교 분석</h2>
+                            <span class="report-date">2025-09-02 13:01</span>
+                        </div>
+                        <p class="report-filename mt-2">20250902-3.html</p>
                     </div>
-                    <p class="report-filename">20250902-3.html</p>
                 </a>
             </div>
-            <div class="report-card">
-                <a href="docs/mutsuki1.html">
-                    <div class="flex justify-between items-center">
-                        <h2 class="report-title">무츠키의 매력 심층 분석 보고서</h2>
-                        <span class="report-date">2025-09-02-12:51</span>
+            <div class="report-card flex flex-col">
+                <a href="docs/mutsuki1.html" class="flex-grow flex flex-col">
+                    <div class="flex-grow">
+                        <div class="flex justify-between items-start">
+                            <h2 class="report-title">무츠키의 매력 심층 분석 보고서</h2>
+                            <span class="report-date">2025-09-02 12:51</span>
+                        </div>
+                        <p class="report-filename mt-2">mutsuki1.html</p>
                     </div>
-                    <p class="report-filename">mutsuki1.html</p>
                 </a>
             </div>
-            <div class="report-card">
-                <a href="docs/20250901-1.html">
-                    <div class="flex justify-between items-center">
-                        <h2 class="report-title">10km 마라톤 8주 훈련 계획</h2>
-                        <span class="report-date">2025-09-02-12:22</span>
+            <div class="report-card flex flex-col">
+                <a href="docs/20250901-1.html" class="flex-grow flex flex-col">
+                    <div class="flex-grow">
+                        <div class="flex justify-between items-start">
+                            <h2 class="report-title">10km 마라톤 8주 훈련 계획</h2>
+                            <span class="report-date">2025-09-02 12:22</span>
+                        </div>
+                        <p class="report-filename mt-2">20250901-1.html</p>
                     </div>
-                    <p class="report-filename">20250901-1.html</p>
                 </a>
             </div>
-            <div class="report-card">
-                <a href="docs/20250902-1.html">
-                    <div class="flex justify-between items-center">
-                        <h2 class="report-title">2025 대한민국 가상 전략 보고서: 유비와 제갈량</h2>
-                        <span class="report-date">2025-09-02-12:22</span>
+            <div class="report-card flex flex-col">
+                <a href="docs/20250902-1.html" class="flex-grow flex flex-col">
+                    <div class="flex-grow">
+                        <div class="flex justify-between items-start">
+                            <h2 class="report-title">2025 대한민국 가상 전략 보고서: 유비와 제갈량</h2>
+                            <span class="report-date">2025-09-02 12:22</span>
+                        </div>
+                        <p class="report-filename mt-2">20250902-1.html</p>
                     </div>
-                    <p class="report-filename">20250902-1.html</p>
                 </a>
             </div>
-            <div class="report-card">
-                <a href="docs/20250902-2.html">
-                    <div class="flex justify-between items-center">
-                        <h2 class="report-title">궁극의 꽃게 요리 비법서</h2>
-                        <span class="report-date">2025-09-02-12:22</span>
+            <div class="report-card flex flex-col">
+                <a href="docs/20250902-2.html" class="flex-grow flex flex-col">
+                    <div class="flex-grow">
+                        <div class="flex justify-between items-start">
+                            <h2 class="report-title">궁극의 꽃게 요리 비법서</h2>
+                            <span class="report-date">2025-09-02 12:22</span>
+                        </div>
+                        <p class="report-filename mt-2">20250902-2.html</p>
                     </div>
-                    <p class="report-filename">20250902-2.html</p>
                 </a>
             </div>
         </main>
     </div>
-</body>
-</html>
+</body></html>
