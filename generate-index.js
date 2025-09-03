@@ -8,10 +8,18 @@ const outputFilePath = path.join(__dirname, 'index.html');
 console.log('--- index.html 생성을 시작합니다 ---');
 let reports = [];
 
-// 날짜를 'YYYY-MM-DD HH:MM' 형식으로 변환하는 함수
-function formatDate(date) {
-    const pad = (num) => num.toString().padStart(2, '0');
-    return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())} ${pad(date.getHours())}:${pad(date.getMinutes())}`;
+// 날짜를 한국 시간(GMT+9) 'YYYY-MM-DD HH:MM' 형식으로 변환하는 함수
+function formatDateToKST(date) {
+    const kstOffset = 9 * 60 * 60 * 1000;
+    const kstDate = new Date(date.getTime() + kstOffset);
+    
+    const year = kstDate.getUTCFullYear();
+    const month = (kstDate.getUTCMonth() + 1).toString().padStart(2, '0');
+    const day = kstDate.getUTCDate().toString().padStart(2, '0');
+    const hours = kstDate.getUTCHours().toString().padStart(2, '0');
+    const minutes = kstDate.getUTCMinutes().toString().padStart(2, '0');
+    
+    return `${year}-${month}-${day} ${hours}:${minutes}`;
 }
 
 const docFiles = fs.readdirSync(docsDir).filter(file => file.endsWith('.html'));
@@ -25,12 +33,12 @@ docFiles.forEach(filename => {
 
     let commitDate;
     try {
-        // 각 파일의 실제 마지막 git commit 시간을 조회합니다.
+        // 각 파일의 실제 마지막 git commit 시간을 조회
         const command = `git log -1 --format=%cI -- "${filePath}"`;
         const isoDate = execSync(command).toString().trim();
         commitDate = new Date(isoDate);
     } catch (e) {
-        // git log 실패 시 현재 시간으로 대체합니다 (오류 방지).
+        // git log 실패 시 현재 시간으로 대체 (오류 방지)
         commitDate = new Date();
         console.warn(`'${filename}'의 git log를 가져오지 못했습니다. 현재 시간으로 대체합니다.`);
     }
@@ -38,11 +46,11 @@ docFiles.forEach(filename => {
     reports.push({ filename, title, date: commitDate });
 });
 
-// 실제 커밋 시간을 기준으로 정확하게 최신순으로 정렬합니다.
+// 실제 커밋 시간을 기준으로 정확하게 최신순으로 정렬
 reports.sort((a, b) => b.date - a.date);
 
 let cardsHTML = reports.map(report => {
-    const displayDate = formatDate(report.date);
+    const displayDate = formatDateToKST(report.date);
 
     return `
             <div class="report-card flex flex-col">
@@ -88,4 +96,4 @@ const finalHTML = `<!DOCTYPE html>
 </body></html>`;
 
 fs.writeFileSync(outputFilePath, finalHTML);
-console.log('--- index.html 생성을 완료했습니다. (헤더 추가 기능 제거 및 정렬 로직 복구) ---');
+console.log('--- index.html 생성을 완료했습니다.---');
