@@ -13,55 +13,67 @@ reportFiles.forEach(filename => {
     const filePath = path.join(docsDir, filename);
     const fileContent = fs.readFileSync(filePath, 'utf-8');
     
-    // 1. <title> 태그 내용 추출
+    // <title> 태그 내용 추출
     const titleMatch = fileContent.match(/<title>(.*?)<\/title>/);
     const title = titleMatch ? titleMatch[1] : filename;
 
-    // 2. 각 파일의 마지막 git commit 날짜 추출
-    // Github Action 환경에서는 전체 git 히스토리를 가져와야 정확합니다.
-    // actions/checkout@v4는 기본적으로 shallow clone이므로, fetch-depth: 0 옵션이 필요할 수 있습니다.
     try {
+        // 각 파일의 마지막 git commit 날짜를 ISO 8601 표준 형식으로 추출
         const command = `git log -1 --format=%cI -- "${filePath}"`;
-        const lastModified = execSync(command).toString().trim();
-        reports.push({
-            filename,
-            title,
-            // ISO 8601 날짜를 'YYYY-MM-DD HH:MM' 형식으로 변경
-            date: new Date(lastModified).toLocaleString('ko-KR', { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', hour12: false }).replace(/\. /g, '-').replace('.', '').slice(0, -1)
-        });
+        const isoDate = execSync(command).toString().trim(); // YYYY-MM-DDTHH:mm:ssZ 형식
+        
+        if (isoDate) {
+            reports.push({
+                filename,
+                title,
+                isoDate: isoDate, // 정렬을 위한 표준 날짜 형식
+            });
+        }
     } catch (e) {
         // git log 실패 시 파일 시스템의 수정 날짜를 사용 (fallback)
         const stats = fs.statSync(filePath);
         reports.push({
             filename,
             title,
-            date: stats.mtime.toLocaleString('ko-KR')
+            isoDate: stats.mtime.toISOString(), // 파일 수정 시간을 ISO 형식으로 저장
         });
         console.warn(`Could not get git log for ${filename}. Falling back to file modification time.`);
     }
 });
 
-// 3. 최신순으로 정렬
-reports.sort((a, b) => new Date(b.date) - new Date(a.date));
+// isoDate (표준 형식)를 기준으로 정확하게 최신순 정렬
+reports.sort((a, b) => new Date(b.isoDate) - new Date(a.isoDate));
 
-// 4. HTML 카드 생성
-let cardsHTML = reports.map(report => `
+// HTML 카드 생성 (이 단계에서 보여줄 날짜 형식으로 변환)
+let cardsHTML = reports.map(report => {
+    // 보여주기 위한 날짜 형식 (YYYY-MM-DD HH:MM)
+    const displayDate = new Date(report.isoDate).toLocaleString('ko-KR', {
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: false
+    }).replace(/\. /g, '-').replace('.', '');
+
+    return `
             <div class="report-card">
                 <a href="docs/${report.filename}">
                     <div class="flex justify-between items-center">
                         <h2 class="report-title">${report.title}</h2>
-                        <span class="report-date">${report.date}</span>
+                        <span class="report-date">${displayDate}</span>
                     </div>
                     <p class="report-filename">${report.filename}</p>
                 </a>
-            </div>`).join('');
+            </div>`;
+}).join('');
 
 const finalHTML = `
 <!DOCTYPE html>
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale-1.0">
     <title>Gemini Deep Research Curation</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet">
@@ -91,4 +103,4 @@ const finalHTML = `
 
 fs.writeFileSync(outputFilePath, finalHTML);
 
-console.log('index.html이 commit 시각 기준으로 성공적으로 업데이트되었습니다!');
+console.log('index.html이 commit 시각 기준으로 정확하게 업데이트되었습니다!');
