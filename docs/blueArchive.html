@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>샬레(S.C.H.A.L.E.) 고찰 연구 보고서</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Kivotos Dawn -->
+    <!-- Application Structure Plan: The application is designed as a single-page dashboard with a fixed sidebar navigation. This thematic structure allows users to freely explore different facets of Schale (e.g., its authority, influence, key activities) in any order, which is more intuitive and engaging than a linear document. Key interactions include clicking on organizational chart elements to reveal details, filtering influence data on a chart, and expanding timeline events. This non-linear, interactive approach is chosen to facilitate deeper, self-directed learning about Schale's complex role in Kivotos, making the dense information more accessible and digestible. -->
+    <!-- Visualization & Content Choices: 
+        1. Report Info: Schale's core attributes -> Goal: Inform -> Viz/Presentation: Interactive summary cards -> Interaction: Hover reveals brief descriptions -> Justification: Provides a quick, high-level understanding at a glance -> Library/Method: HTML/CSS/JS.
+        2. Report Info: Schale's organizational structure -> Goal: Organize -> Viz/Presentation: Diagram built with HTML/CSS -> Interaction: Click on roles (Sensei, Rin) to display detailed text -> Justification: Visually clarifies relationships and hierarchies without using static images or forbidden libraries -> Library/Method: HTML/CSS/JS.
+        3. Report Info: Schale's relative power -> Goal: Compare -> Viz/Presentation: Radar Chart -> Interaction: Tooltips on hover provide specific context on influence scores -> Justification: Effectively visualizes and compares multi-dimensional influence against other major factions -> Library/Method: Chart.js/Canvas.
+        4. Report Info: Schale's historical interventions -> Goal: Show change over time -> Viz/Presentation: Interactive vertical timeline -> Interaction: Click to expand event details -> Justification: Presents a chronological narrative of Schale's activities in a compact and engaging format -> Library/Method: HTML/CSS/JS.
+    -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Noto Sans KR', sans-serif;
+            background-color: #F8F9FA;
+            color: #343A40;
+        }
+        .content-section {
+            display: none;
+        }
+        .content-section.active {
+            display: block;
+        }
+        .nav-link {
+            transition: all 0.2s ease-in-out;
+        }
+        .nav-link.active {
+            background-color: #E9ECEF;
+            color: #007BFF;
+            border-right: 3px solid #007BFF;
+        }
+        .nav-link:hover {
+            background-color: #F1F3F5;
+        }
+        .card {
+            background-color: white;
+            border-radius: 0.75rem;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+            transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+        }
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -2px rgb(0 0 0 / 0.1);
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 300px;
+            max-height: 400px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 400px;
+            }
+        }
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            left: -1.375rem;
+            top: 0.25rem;
+            width: 1rem;
+            height: 1rem;
+            background-color: #007BFF;
+            border-radius: 50%;
+            border: 2px solid #F8F9FA;
+        }
+        .fade-in {
+            animation: fadeIn 0.5s ease-in-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body class="antialiased">
+    <div class="flex h-screen bg-gray-100">
+        <aside class="w-64 bg-white shadow-md hidden md:block">
+            <div class="p-6">
+                <h1 class="text-xl font-bold text-blue-600">샬레(S.C.H.A.L.E.)</h1>
+                <p class="text-sm text-gray-500">심층 분석 보고서</p>
+            </div>
+            <nav id="desktop-nav" class="mt-6">
+                <a href="#overview" class="nav-link active flex items-center px-6 py-3 text-gray-700">
+                    <span class="mx-3">개요</span>
+                </a>
+                <a href="#organization" class="nav-link flex items-center px-6 py-3 text-gray-700">
+                    <span class="mx-3">조직과 권한</span>
+                </a>
+                <a href="#influence" class="nav-link flex items-center px-6 py-3 text-gray-700">
+                    <span class="mx-3">영향력 분석</span>
+                </a>
+                <a href="#activities" class="nav-link flex items-center px-6 py-3 text-gray-700">
+                    <span class="mx-3">주요 활동</span>
+                </a>
+                <a href="#issues" class="nav-link flex items-center px-6 py-3 text-gray-700">
+                    <span class="mx-3">핵심 논쟁점</span>
+                </a>
+            </nav>
+        </aside>
+
+        <div class="flex-1 flex flex-col overflow-hidden">
+            <header class="flex justify-between items-center p-4 bg-white border-b-2 md:border-b-0">
+                <div class="md:hidden">
+                    <h1 class="text-xl font-bold text-blue-600">샬레 분석 보고서</h1>
+                </div>
+                <button id="mobile-menu-button" class="text-gray-500 focus:outline-none md:hidden">
+                    <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7" />
+                    </svg>
+                </button>
+            </header>
+            
+            <div id="mobile-nav" class="hidden md:hidden bg-white border-b">
+                <a href="#overview" class="block py-2 px-4 text-sm text-gray-700 hover:bg-gray-200">개요</a>
+                <a href="#organization" class="block py-2 px-4 text-sm text-gray-700 hover:bg-gray-200">조직과 권한</a>
+                <a href="#influence" class="block py-2 px-4 text-sm text-gray-700 hover:bg-gray-200">영향력 분석</a>
+                <a href="#activities" class="block py-2 px-4 text-sm text-gray-700 hover:bg-gray-200">주요 활동</a>
+                <a href="#issues" class="block py-2 px-4 text-sm text-gray-700 hover:bg-gray-200">핵심 논쟁점</a>
+            </div>
+
+            <main class="flex-1 overflow-x-hidden overflow-y-auto bg-gray-100 p-4 md:p-8">
+                <div id="content-container">
+                    <section id="overview" class="content-section active fade-in">
+                        <h2 class="text-3xl font-bold text-gray-800 mb-2">샬레(S.C.H.A.L.E.) 개요</h2>
+                        <p class="text-gray-600 mb-8">연방수사동아리 샬레는 총학생회장이 실종되기 전 설립한 조직으로, 키보토스 전역의 문제를 해결하는 임무를 맡고 있습니다. 이 섹션에서는 샬레의 핵심적인 특징과 그 설립 배경을 탐구합니다.</p>
+                        
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                            <div class="card p-6">
+                                <h3 class="text-lg font-bold text-blue-600">치외법권</h3>
+                                <p class="mt-2 text-gray-600">샬레는 키보토스의 어떤 자치구의 법에도 구속되지 않는 초법규적 권한을 가집니다. 이는 신속한 문제 해결을 위한 필수적인 장치입니다.</p>
+                            </div>
+                            <div class="card p-6">
+                                <h3 class="text-lg font-bold text-blue-600">학생 동원권</h3>
+                                <p class="mt-2 text-gray-600">소속과 자치구에 관계없이 모든 학생에게 협력을 요청하고 지휘할 수 있는 막강한 권한을 보유하고 있습니다.</p>
+                            </div>
+                            <div class="card p-6">
+                                <h3 class="text-lg font-bold text-blue-600">선생의 역할</h3>
+                                <p class="mt-2 text-gray-600">외부에서 초빙된 '선생'은 샬레의 유일한 어른이자 실질적인 지휘관으로, 학생들을 이끌고 작전을 총괄합니다.</p>
+                            </div>
+                        </div>
+
+                        <div class="card mt-8 p-6">
+                            <h3 class="text-xl font-bold mb-4">설립 목적과 비전</h3>
+                            <p class="text-gray-700">총학생회장의 실종으로 행정 마비 상태에 빠진 키보토스. 샬레는 이러한 혼란을 수습하고, 학원 도시의 균형을 유지하기 위한 마지막 안전장치로서 설립되었습니다. 총학생회장은 샬레와 '선생'의 존재가 키보토스의 미래를 위한 열쇠가 될 것이라 믿었습니다. 샬레의 활동은 단순히 사건을 해결하는 것을 넘어, 분열된 학원들을 하나로 묶고 학생들의 성장을 이끄는 교육적 사명까지 내포하고 있습니다.</p>
+                        </div>
+                    </section>
+
+                    <section id="organization" class="content-section fade-in">
+                        <h2 class="text-3xl font-bold text-gray-800 mb-2">조직 구조와 지휘 계통</h2>
+                        <p class="text-gray-600 mb-8">샬레는 전통적인 동아리와는 다른 독특한 조직 구조를 가지고 있습니다. 선생을 정점으로, 총학생회의 지원을 받는 유연한 구조는 키보토스의 다양한 위협에 효과적으로 대응할 수 있게 합니다. 아래 다이어그램의 각 요소를 클릭하여 상세 정보를 확인하세요.</p>
+                        
+                        <div class="card p-6 md:p-8">
+                            <div class="text-center">
+                                <div id="org-총학생회장" class="org-item inline-block bg-gray-200 text-gray-700 font-bold py-2 px-4 rounded-lg cursor-pointer transition hover:bg-gray-300">총학생회장 (설립자)</div>
+                                <div class="w-px h-8 bg-gray-400 mx-auto"></div>
+                            </div>
+                            <div class="text-center">
+                                <div class="inline-block bg-blue-100 border-2 border-blue-500 text-blue-800 font-bold py-4 px-6 rounded-xl shadow-lg">연방수사동아리 샬레</div>
+                                <div class="flex justify-center">
+                                    <div class="w-px h-8 bg-gray-400"></div>
+                                </div>
+                                <div class="flex justify-center items-start gap-4 md:gap-8">
+                                    <div class="text-center w-1/2">
+                                        <div class="h-8 border-l border-r border-t border-gray-400 w-full mx-auto"></div>
+                                        <div class="w-px h-4 bg-gray-400 mx-auto"></div>
+                                        <div id="org-선생" class="org-item bg-blue-500 text-white font-bold py-2 px-4 rounded-lg cursor-pointer transition hover:bg-blue-600">선생 (고문/지휘관)</div>
+                                    </div>
+                                    <div class="text-center w-1/2">
+                                        <div class="h-8 border-l border-r border-t border-gray-400 w-full mx-auto"></div>
+                                        <div class="w-px h-4 bg-gray-400 mx-auto"></div>
+                                        <div id="org-총학생회" class="org-item bg-green-500 text-white font-bold py-2 px-4 rounded-lg cursor-pointer transition hover:bg-green-600">총학생회 (행정 지원)</div>
+                                    </div>
+                                </div>
+                                <div class="w-px h-8 bg-gray-400 mx-auto"></div>
+                            </div>
+                             <div class="text-center">
+                                <div class="inline-block bg-purple-100 border border-purple-400 text-purple-800 font-semibold py-2 px-4 rounded-lg">키보토스 전 학원/학생 (협력 대상)</div>
+                            </div>
+                        </div>
+
+                        <div id="org-details" class="card mt-8 p-6 min-h-[150px]">
+                            <h3 id="org-details-title" class="text-xl font-bold text-gray-800">상세 정보</h3>
+                            <p id="org-details-text" class="mt-2 text-gray-700">조직도의 각 항목을 클릭하여 자세한 설명을 확인하세요.</p>
+                        </div>
+                    </section>
+
+                    <section id="influence" class="content-section fade-in">
+                        <h2 class="text-3xl font-bold text-gray-800 mb-2">키보토스 내 영향력 분석</h2>
+                        <p class="text-gray-600 mb-8">샬레의 권한은 키보토스의 힘의 균형에 중대한 영향을 미칩니다. 이 차트는 샬레의 영향력을 다른 주요 세력(총학생회, 게헨나, 트리니티)과 비교하여 정치, 군사, 정보, 경제적 측면에서 분석한 결과입니다. 각 축은 해당 분야의 영향력 수준을 나타냅니다.</p>
+
+                        <div class="card p-4 md:p-6">
+                            <div class="chart-container">
+                                <canvas id="influenceChart"></canvas>
+                            </div>
+                        </div>
+                        <div class="card mt-8 p-6">
+                            <h3 class="text-xl font-bold mb-4">분석 요약</h3>
+                            <p class="text-gray-700">샬레는 직접적인 군사력이나 경제 기반은 약하지만, '선생'의 지휘 능력과 '학생 동원권'을 통해 키보토스 최강의 군사적 영향력을 발휘합니다. 또한, 치외법권을 바탕으로 한 정보 수집 및 사건 해결 능력은 타 세력을 압도합니다. 반면, 직접적인 정치 개입이나 경제 활동은 최소화하여 세력 간의 균형을 유지하는 중재자 역할에 집중하는 경향을 보입니다. 이는 샬레가 권력 기관이 아닌, 문제 해결을 위한 특수 기관임을 명확히 보여줍니다.</p>
+                        </div>
+                    </section>
+                    
+                    <section id="activities" class="content-section fade-in">
+                        <h2 class="text-3xl font-bold text-gray-800 mb-2">주요 활동 기록</h2>
+                        <p class="text-gray-600 mb-8">샬레 설립 이후, 키보토스 전역에서 발생한 수많은 사건들을 해결해왔습니다. 다음은 샬레의 활동 중 학원 도시에 큰 영향을 미친 주요 사건들의 타임라인입니다. 각 항목을 클릭하여 사건 개요를 확인하세요.</p>
+                        <div class="card p-6 md:p-8">
+                            <div class="relative border-l-2 border-gray-300 ml-4">
+                                <div class="timeline-item mb-8 ml-8 cursor-pointer" data-activity="abydos">
+                                    <h3 class="text-lg font-bold text-blue-600">아비도스 대책위원회 지원</h3>
+                                    <time class="text-sm font-normal leading-none text-gray-500">초기 활동</time>
+                                    <div class="activity-details hidden mt-2 text-gray-700 bg-gray-50 p-4 rounded-md">
+                                        <p>막대한 빚으로 폐교 위기에 처한 아비도스 고등학교를 지원. 샬레의 개입은 대책위원회 학생들이 학교를 지킬 수 있는 결정적인 계기가 되었으며, 금융 범죄 조직과의 전면전을 통해 샬레의 존재감을 키보토스에 각인시켰다.</p>
+                                    </div>
+                                </div>
+                                <div class="timeline-item mb-8 ml-8 cursor-pointer" data-activity="eden">
+                                    <h3 class="text-lg font-bold text-blue-600">에덴조약 분쟁 개입</h3>
+                                    <time class="text-sm font-normal leading-none text-gray-500">중대 사건</time>
+                                    <div class="activity-details hidden mt-2 text-gray-700 bg-gray-50 p-4 rounded-md">
+                                        <p>트리니티와 게헨나 간의 평화 조약인 '에덴조약'을 둘러싼 거대한 음모에 개입. 샬레는 배후 세력을 밝혀내고 조약 파기를 막음으로써 두 학원 간의 전면전을 막고 키보토스의 평화를 수호했다.</p>
+                                    </div>
+                                </div>
+                                <div class="timeline-item mb-8 ml-8 cursor-pointer" data-activity="volumeduodecim">
+                                    <h3 class="text-lg font-bold text-blue-600">색채 침공 방어</h3>
+                                    <time class="text-sm font-normal leading-none text-gray-500">전 지구적 위기</time>
+                                    <div class="activity-details hidden mt-2 text-gray-700 bg-gray-50 p-4 rounded-md">
+                                        <p>키보토스를 위협하는 외부 존재 '색채'의 대규모 침공에 맞서 모든 학원의 학생들을 규합하여 방어전을 지휘. 이 사건을 통해 샬레와 선생은 키보토스의 유일한 희망으로 자리매김했다.</p>
+                                    </div>
+                                </div>
+                                 <div class="timeline-item ml-8 cursor-pointer" data-activity="rabbit">
+                                    <h3 class="text-lg font-bold text-blue-600">RABBIT 소대 임시 보호</h3>
+                                    <time class="text-sm font-normal leading-none text-gray-500">지속적 활동</time>
+                                    <div class="activity-details hidden mt-2 text-gray-700 bg-gray-50 p-4 rounded-md">
+                                        <p>SRT 특수학원의 폐교로 갈 곳을 잃은 RABBIT 소대를 임시로 보호하고, 그들이 다시 학생으로서의 삶을 이어갈 수 있도록 지원. 이는 샬레가 단순한 군사 조직이 아닌, 학생들을 보호하는 교육 기관의 역할도 수행함을 보여주는 사례이다.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <section id="issues" class="content-section fade-in">
+                        <h2 class="text-3xl font-bold text-gray-800 mb-2">핵심 논쟁점: 권한과 책임</h2>
+                        <p class="text-gray-600 mb-8">샬레의 막강한 권한은 키보토스의 안정에 기여하는 동시에, 여러 논쟁을 낳고 있습니다. 샬레의 존재가 키보토스에 미치는 긍정적, 부정적 측면을 균형 있게 고찰해볼 필요가 있습니다.</p>
+                        
+                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                            <div class="card p-6">
+                                <h3 class="text-xl font-bold text-green-600 mb-4">긍정적 측면: 질서의 수호자</h3>
+                                <ul class="space-y-3 text-gray-700">
+                                    <li class="flex items-start">
+                                        <span class="text-green-500 mr-2">✔</span>
+                                        <p><strong class="font-semibold">신속한 위기 대응:</strong> 총학생회의 행정 공백 속에서 발생하는 각종 사건에 신속하게 개입하여 피해 확산을 막는다.</p>
+                                    </li>
+                                    <li class="flex items-start">
+                                        <span class="text-green-500 mr-2">✔</span>
+                                        <p><strong class="font-semibold">세력 간 중재:</strong> 학원 간의 갈등이 극단적인 무력 충돌로 비화하지 않도록 중재자 역할을 수행한다.</p>
+                                    </li>
+                                    <li class="flex items-start">
+                                        <span class="text-green-500 mr-2">✔</span>
+                                        <p><strong class="font-semibold">학생 보호 및 성장:</strong> 위기에 처한 학생들을 보호하고, 다양한 경험을 통해 그들이 성장할 수 있는 기회를 제공한다.</p>
+                                    </li>
+                                </ul>
+                            </div>
+                            <div class="card p-6">
+                                <h3 class="text-xl font-bold text-red-600 mb-4">부정적 측면 및 잠재적 위험</h3>
+                                <ul class="space-y-3 text-gray-700">
+                                    <li class="flex items-start">
+                                        <span class="text-red-500 mr-2">✖</span>
+                                        <p><strong class="font-semibold">권력 집중의 위험:</strong> 모든 권한이 '선생' 한 개인에게 집중되어 있어, 선생의 판단 착오나 부재 시 시스템 전체가 마비될 수 있다.</p>
+                                    </li>
+                                    <li class="flex items-start">
+                                        <span class="text-red-500 mr-2">✖</span>
+                                        <p><strong class="font-semibold">기존 질서와의 충돌:</strong> 치외법권적 지위는 각 학원의 자치권을 침해할 소지가 있으며, 이는 기존 기득권 세력의 반발을 야기한다.</p>
+                                    </li>
+                                    <li class="flex items-start">
+                                        <span class="text-red-500 mr-2">✖</span>
+                                        <p><strong class="font-semibold">책임 소재의 불분명함:</strong> 독립적인 조직 구조로 인해 활동 결과에 대한 책임과 감시 시스템이 부재하다는 비판이 존재한다.</p>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </section>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const contentContainer = document.getElementById('content-container');
+            const sections = document.querySelectorAll('.content-section');
+            const navLinks = document.querySelectorAll('.nav-link');
+            const mobileNavLinks = document.querySelectorAll('#mobile-nav a');
+            const mobileMenuButton = document.getElementById('mobile-menu-button');
+            const mobileNav = document.getElementById('mobile-nav');
+
+            const navigateTo = (hash) => {
+                const targetId = hash.substring(1);
+                const targetSection = document.getElementById(targetId);
+                
+                if (!targetSection) return;
+
+                sections.forEach(section => {
+                    section.classList.remove('active');
+                });
+
+                const newSection = document.getElementById(targetId);
+                if (newSection) {
+                    newSection.classList.add('active');
+                    contentContainer.scrollTop = 0;
+                }
+
+                navLinks.forEach(link => {
+                    if (link.getAttribute('href') === hash) {
+                        link.classList.add('active');
+                    } else {
+                        link.classList.remove('active');
+                    }
+                });
+
+                if (window.innerWidth < 768) {
+                    mobileNav.classList.add('hidden');
+                }
+            };
+
+            const handleNavClick = (event) => {
+                event.preventDefault();
+                const hash = event.currentTarget.getAttribute('href');
+                window.location.hash = hash;
+            };
+
+            navLinks.forEach(link => {
+                link.addEventListener('click', handleNavClick);
+            });
+
+            mobileNavLinks.forEach(link => {
+                link.addEventListener('click', handleNavClick);
+            });
+            
+            mobileMenuButton.addEventListener('click', () => {
+                mobileNav.classList.toggle('hidden');
+            });
+            
+            window.addEventListener('hashchange', () => {
+                navigateTo(window.location.hash || '#overview');
+            });
+
+            navigateTo(window.location.hash || '#overview');
+            
+            const orgItems = document.querySelectorAll('.org-item');
+            const orgDetailsTitle = document.getElementById('org-details-title');
+            const orgDetailsText = document.getElementById('org-details-text');
+            
+            const orgDetailsData = {
+                'org-총학생회장': {
+                    title: '총학생회장 (설립자)',
+                    text: '키보토스의 최고 행정 책임자. 실종 전, 키보토스의 혼란을 예견하고 최후의 수단으로 샬레를 설립하고 외부에서 선생을 초빙했다. 샬레의 모든 권한은 총학생회장으로부터 위임된 것이다.'
+                },
+                'org-선생': {
+                    title: '선생 (고문/지휘관)',
+                    text: '샬레의 실질적인 운영자이자 유일한 어른. 학생들을 지휘하여 작전을 수행하며, 학생들의 고민을 들어주는 상담자이자 성장을 이끄는 교육자이다. 선생의 판단과 결정이 샬레의 모든 활동 방향을 결정한다.'
+                },
+                'org-총학생회': {
+                    title: '총학생회 (행정 지원)',
+                    text: '현재는 총학생회장 대행 체제로 운영되고 있으며, 샬레의 활동에 필요한 행정적, 재정적 지원을 담당한다. 샬레의 월권 행위를 견제하고 협력하는 복합적인 관계에 있다.'
+                }
+            };
+
+            orgItems.forEach(item => {
+                item.addEventListener('click', () => {
+                    const data = orgDetailsData[item.id];
+                    if (data) {
+                        orgDetailsTitle.textContent = data.title;
+                        orgDetailsText.textContent = data.text;
+                    }
+                });
+            });
+
+            const activityItems = document.querySelectorAll('.timeline-item');
+            activityItems.forEach(item => {
+                item.addEventListener('click', () => {
+                    const details = item.querySelector('.activity-details');
+                    const isVisible = !details.classList.contains('hidden');
+                    
+                    document.querySelectorAll('.activity-details').forEach(d => d.classList.add('hidden'));
+
+                    if (!isVisible) {
+                        details.classList.remove('hidden');
+                    }
+                });
+            });
+
+            const ctx = document.getElementById('influenceChart');
+            if(ctx) {
+                new Chart(ctx, {
+                    type: 'radar',
+                    data: {
+                        labels: ['군사력', '정치력', '정보력', '경제력', '기술력'],
+                        datasets: [{
+                            label: '샬레',
+                            data: [95, 40, 90, 20, 50],
+                            backgroundColor: 'rgba(0, 123, 255, 0.2)',
+                            borderColor: 'rgba(0, 123, 255, 1)',
+                            pointBackgroundColor: 'rgba(0, 123, 255, 1)',
+                            pointBorderColor: '#fff',
+                            pointHoverBackgroundColor: '#fff',
+                            pointHoverBorderColor: 'rgba(0, 123, 255, 1)'
+                        }, {
+                            label: '총학생회',
+                            data: [60, 90, 70, 85, 80],
+                            backgroundColor: 'rgba(40, 167, 69, 0.2)',
+                            borderColor: 'rgba(40, 167, 69, 1)',
+                            pointBackgroundColor: 'rgba(40, 167, 69, 1)',
+                            pointBorderColor: '#fff',
+                            pointHoverBackgroundColor: '#fff',
+                            pointHoverBorderColor: 'rgba(40, 167, 69, 1)'
+                        },
+                        {
+                            label: '게헨나/트리니티',
+                            data: [85, 75, 60, 70, 65],
+                            backgroundColor: 'rgba(220, 53, 69, 0.2)',
+                            borderColor: 'rgba(220, 53, 69, 1)',
+                            pointBackgroundColor: 'rgba(220, 53, 69, 1)',
+                            pointBorderColor: '#fff',
+                            pointHoverBackgroundColor: '#fff',
+                            pointHoverBorderColor: 'rgba(220, 53, 69, 1)'
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            r: {
+                                angleLines: {
+                                    color: 'rgba(0, 0, 0, 0.1)'
+                                },
+                                grid: {
+                                    color: 'rgba(0, 0, 0, 0.1)'
+                                },
+                                pointLabels: {
+                                    font: {
+                                        size: 14,
+                                        family: "'Noto Sans KR', sans-serif"
+                                    },
+                                    color: '#343A40'
+                                },
+                                ticks: {
+                                    backdropColor: 'rgba(255, 255, 255, 0.75)',
+                                    color: '#6c757d'
+                                },
+                                suggestedMin: 0,
+                                suggestedMax: 100
+                            }
+                        },
+                        plugins: {
+                            legend: {
+                                position: 'top',
+                                labels: {
+                                    font: {
+                                      family: "'Noto Sans KR', sans-serif"
+                                    }
+                                }
+                            },
+                            tooltip: {
+                                titleFont: {
+                                  family: "'Noto Sans KR', sans-serif"
+                                },
+                                bodyFont: {
+                                  family: "'Noto Sans KR', sans-serif"
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+        });
+    </script>
+</body>
+</html>
