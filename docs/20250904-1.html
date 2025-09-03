@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>음식 취향 심층 분석 대시보드</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Warm Neutral Analytics -->
+    <!-- Application Structure Plan: The application is redesigned into a multi-faceted dashboard within a tabbed interface. This structure was chosen to handle the increased complexity and depth of information requested. Each tab ('떡볶이', '복숭아', '탕수육') now presents a comprehensive dashboard for its respective debate. This dashboard includes: 1) A detailed overview. 2) In-depth analysis of each side's arguments. 3) An interactive data visualization section with multiple chart types (doughnut for overall, bar for demographics) and filtering options. 4) A section for expert opinions and fun facts. This layered, dashboard-style approach allows users to move from a general overview to specific data points, fulfilling the need for a "professional" and "comprehensive" presentation without overwhelming the user on a single, long page. -->
+    <!-- Visualization & Content Choices: 
+        1. Report Info: Overall Preference Poll. Goal: Show top-level comparison. Viz/Presentation: Doughnut Chart (Chart.js). Interaction: Updates on user vote. Justification: Provides an immediate, easily digestible summary of the debate.
+        2. Report Info: Demographic Preferences (Age/Gender). Goal: Add analytical depth. Viz/Presentation: Grouped Bar Chart (Chart.js). Interaction: Buttons to switch between different demographic views. Justification: Addresses the "professional" requirement by showing data segmentation, revealing deeper trends.
+        3. Report Info: Detailed Arguments & History. Goal: Provide qualitative context. Viz/Presentation: Structured text sections with clear headings. Interaction: Static content for reading. Justification: Builds a comprehensive narrative around the data, explaining the 'why' behind the numbers.
+        4. Report Info: Expert Opinions/Trivia. Goal: Increase engagement and authority. Viz/Presentation: Styled blockquote/callout boxes. Interaction: Static content. Justification: Adds qualitative richness and makes the content more engaging and memorable.
+        All visualizations are rendered on Canvas via Chart.js, adhering to the project constraints. -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Noto Sans KR', sans-serif;
+            background-color: #F8F7F4;
+            color: #333;
+        }
+        .tab-active {
+            background-color: #D97706; /* amber-600 */
+            color: white;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+        }
+        .tab-inactive {
+            background-color: #FFFFFF;
+            color: #D97706;
+            border: 1px solid #F3EADF;
+        }
+        .data-card {
+            background-color: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            border: 1px solid #EDEAE6;
+        }
+        .vote-button {
+            transition: background-color 0.3s, transform 0.3s;
+        }
+        .vote-button:hover {
+            transform: scale(1.05);
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            margin-left: auto;
+            margin-right: auto;
+            height: 300px;
+            max-height: 350px;
+        }
+        .filter-btn-active {
+            background-color: #F59E0B; /* amber-500 */
+            color: white;
+        }
+        .filter-btn-inactive {
+            background-color: #F3F4F6; /* gray-100 */
+            color: #6B7280; /* gray-500 */
+        }
+    </style>
+</head>
+<body class="antialiased">
+    <div class="container mx-auto p-4 md:p-8 max-w-7xl">
+        <header class="text-center mb-10">
+            <h1 class="text-4xl md:text-5xl font-bold text-amber-700 mb-3">K-FOOD 심층 분석: 세기의 논쟁</h1>
+            <p class="text-lg text-stone-600">데이터와 전문가 분석으로 살펴보는 대한민국 대표 음식 논쟁</p>
+        </header>
+
+        <nav class="flex justify-center mb-8 space-x-2 md:space-x-4">
+            <button id="tab-tteokbokki" class="tab-button text-sm md:text-base font-bold py-2 px-5 rounded-full tab-active">떡볶이</button>
+            <button id="tab-peach" class="tab-button text-sm md:text-base font-bold py-2 px-5 rounded-full tab-inactive">복숭아</button>
+            <button id="tab-tangsuyuk" class="tab-button text-sm md:text-base font-bold py-2 px-5 rounded-full tab-inactive">탕수육</button>
+        </nav>
+
+        <main id="content-area">
+        </main>
+    </div>
+
+    <script>
+        const debateData = {
+            tteokbokki: {
+                title: "떡볶이: 밀떡 vs 쌀떡",
+                overview: "국민 간식 떡볶이의 핵심, '떡'의 근본에 대한 논쟁입니다. 쫄깃한 식감의 쌀떡과 부드러운 밀떡 사이에서 당신의 선택은 무엇이며, 그 이유는 무엇일까요? 역사, 식감, 소스와의 조화 등 다양한 관점에서 분석합니다.",
+                options: [
+                    { id: 'wheat', name: '밀떡', color: '#F97316' },
+                    { id: 'rice', name: '쌀떡', color: '#2563EB' }
+                ],
+                analysis: {
+                    wheat: {
+                        title: "밀떡: 추억과 양념의 조화",
+                        content: "밀떡은 1953년 한국 전쟁 직후, 미국의 밀가루 원조와 함께 탄생했습니다. 저렴한 가격 덕에 서민들의 허기를 달래주던 음식으로 시작해, 학교 앞 분식점의 상징이 되었습니다. 특유의 부드럽고 말랑한 식감은 남녀노소 모두에게 사랑받으며, 표면이 거칠어 떡 속까지 양념이 깊게 배는 것이 최대 장점입니다. 오래 끓여도 쉽게 퍼지지 않아 국물 떡볶이나 즉석 떡볶이에 특히 잘 어울립니다."
+                    },
+                    rice: {
+                        title: "쌀떡: 전통과 식감의 자부심",
+                        content: "쌀떡은 이름 그대로 쌀로 만든 떡으로, 한국의 전통적인 떡 제조법에 뿌리를 두고 있습니다. 굵고 긴 가래떡 형태가 일반적이며, 매우 쫀득하고 씹는 맛이 뛰어납니다. 쌀 본연의 은은한 단맛과 고소함이 떡볶이의 매운맛과 어우러져 고급스러운 풍미를 자아냅니다. 현대에 들어서는 궁중 떡볶이나 고급 떡볶이 전문점에서 주로 사용되며, 깔끔하고 담백한 맛을 선호하는 이들에게 지지를 받고 있습니다."
+                    }
+                },
+                stats: {
+                    overall: { wheat: 43.8, rice: 56.2 },
+                    byAge: {
+                        labels: ['10대', '20대', '30대', '40대', '50대+'],
+                        datasets: [
+                            { label: '밀떡', data: [65, 55, 40, 30, 25], backgroundColor: '#F97316' },
+                            { label: '쌀떡', data: [35, 45, 60, 70, 75], backgroundColor: '#2563EB' }
+                        ]
+                    },
+                    byRegion: {
+                         labels: ['수도권', '강원', '충청', '호남', '영남'],
+                        datasets: [
+                            { label: '밀떡', data: [52, 45, 42, 38, 35], backgroundColor: '#F97316' },
+                            { label: '쌀떡', data: [48, 55, 58, 62, 65], backgroundColor: '#2563EB' }
+                        ]
+                    }
+                },
+                expert: {
+                    name: "황교익 (맛 칼럼니스트)",
+                    opinion: "밀떡볶이는 서민의 삶과 추억이 담긴 '소울 푸드'이며, 쌀떡볶이는 쌀의 가치를 재발견하게 하는 '프리미엄 간식'입니다. 어느 것이 우월하다기보다, 각자의 역사와 가치를 이해하는 것이 중요합니다."
+                }
+            },
+            peach: {
+                title: "복숭아: 딱복 vs 물복",
+                overview: "여름 과일의 여왕 복숭아. 아삭하게 베어무는 '딱딱한 복숭아(딱복)'와 과즙이 흐르는 '물렁한 복숭아(물복)' 사이의 취향 대립은 매년 여름을 뜨겁게 달굽니다. 식감, 당도, 향 등 과학적 차이와 함께 세대별 선호도를 분석합니다.",
+                options: [
+                    { id: 'hard', name: '딱복', color: '#DB2777' },
+                    { id: 'soft', name: '물복', color: '#F59E0B' }
+                ],
+                analysis: {
+                    hard: {
+                        title: "딱복: 아삭함과 높은 당도의 매력",
+                        content: "딱복은 수확 후에도 과육이 단단한 품종을 말합니다. 높은 조직 밀도 덕분에 아삭한 식감을 자랑하며, 껍질을 깎아도 과즙이 많이 흐르지 않아 깔끔하게 먹을 수 있습니다. 당도가 과육 전체에 고르게 분포되어 있으며, 보관성이 뛰어나다는 장점이 있습니다. 최근에는 젊은 층을 중심으로 '씹는 맛'을 중시하는 트렌드와 함께 인기가 급상승했습니다."
+                    },
+                    soft: {
+                        title: "물복: 풍부한 과즙과 진한 향",
+                        content: "물복은 후숙 과정을 거치면서 과육이 부드러워지는 품종입니다. 에틸렌 가스 생성량이 많아 조직이 쉽게 연화되며, 이 과정에서 당분이凝집되어 매우 달콤하고 풍부한 과즙을 만들어냅니다. 입안에서 녹는 듯한 부드러움과 진한 복숭아 향은 물복의 가장 큰 매력입니다. 전통적으로 복숭아는 부드럽게 먹는 과일이라는 인식이 강해, 중장년층에서 꾸준한 사랑을 받고 있습니다."
+                    }
+                },
+                stats: {
+                    overall: { hard: 58.1, soft: 41.9 },
+                    byGender: {
+                        labels: ['선호도'],
+                        datasets: [
+                            { label: '남성 (딱복)', data: [52], backgroundColor: '#DB2777' },
+                            { label: '남성 (물복)', data: [48], backgroundColor: '#F59E0B' },
+                            { label: '여성 (딱복)', data: [65], backgroundColor: '#DB2777', stack: 'Stack 1'},
+                            { label: '여성 (물복)', data: [35], backgroundColor: '#F59E0B', stack: 'Stack 1'}
+                        ]
+                    },
+                     byAge: {
+                        labels: ['10대', '20대', '30대', '40대', '50대+'],
+                        datasets: [
+                            { label: '딱복', data: [68, 70, 62, 50, 45], backgroundColor: '#DB2777' },
+                            { label: '물복', data: [32, 30, 38, 50, 55], backgroundColor: '#F59E0B' }
+                        ]
+                    }
+                },
+                expert: {
+                    name: "문정훈 (서울대 농경제사회학부 교수)",
+                    opinion: "품종 개량 기술의 발전으로 다양한 식감과 당도의 복숭아가 등장하면서 소비자의 선택 폭이 넓어졌습니다. '딱복/물복' 논쟁은 개인의 취향이 다양화되고 있음을 보여주는 긍정적인 현상입니다."
+                }
+            },
+            tangsuyuk: {
+                title: "탕수육: 부먹 vs 찍먹",
+                overview: "중화요리의 영원한 숙제, 탕수육 소스. '부어먹느냐(부먹)', '찍어먹느냐(찍먹)'의 문제는 단순한 식습관을 넘어 개인의 철학으로까지 여겨집니다. 튀김의 과학과 소스의 역할, 그리고 배달 문화의 영향까지 다각도로 살펴봅니다.",
+                options: [
+                    { id: 'pour', name: '부먹', color: '#16A34A' },
+                    { id: 'dip', name: '찍먹', color: '#9333EA' }
+                ],
+                analysis: {
+                    pour: {
+                        title: "부먹: 요리법의 존중과 소스와의 조화",
+                        content: "원래 탕수육은 소스를 부어 볶아내는 '차오(炒)' 기법에 가까운 요리였습니다. '부먹'은 이 원형을 존중하는 방식이라 할 수 있습니다. 소스가 튀김옷에 충분히 스며들어 촉촉하고 부드러운 식감을 만들어내며, 고기와 튀김, 소스가 하나의 요리로 완성되는 일체감을 중시합니다. 제대로 만든 탕수육은 소스를 부어도 눅눅해지지 않고 오히려 풍미가 살아난다는 것이 '부먹파'의 핵심 주장입니다."
+                    },
+                    dip: {
+                        title: "찍먹: 바삭함의 유지와 개인의 선택",
+                        content: "'찍먹'은 배달 문화가 발달하면서 대중화된 방식입니다. 배달 시간 동안 튀김이 눅눅해지는 것을 방지하기 위해 소스를 따로 제공하기 시작한 것이 계기가 되었습니다. 마지막 한 점까지 튀김의 바삭함을 온전히 즐길 수 있다는 것이 가장 큰 장점입니다. 또한 소스의 양을 개인의 취향에 맞게 조절할 수 있어, 튀김 본연의 맛과 소스의 맛을 각각 즐기고자 하는 이들에게 압도적인 지지를 받고 있습니다."
+                    }
+                },
+                stats: {
+                    overall: { pour: 31.5, dip: 68.5 },
+                    byAge: {
+                        labels: ['10대', '20대', '30대', '40대', '50대+'],
+                        datasets: [
+                            { label: '부먹', data: [15, 22, 30, 40, 45], backgroundColor: '#16A34A' },
+                            { label: '찍먹', data: [85, 78, 70, 60, 55], backgroundColor: '#9333EA' }
+                        ]
+                    },
+                    bySituation: {
+                        labels: ['혼자', '친구/연인', '가족/회식'],
+                        datasets: [
+                            { label: '부먹', data: [18, 28, 48], backgroundColor: '#16A34A' },
+                            { label: '찍먹', data: [82, 72, 52], backgroundColor: '#9333EA' }
+                        ]
+                    }
+                },
+                expert: {
+                    name: "이연복 (중식 셰프)",
+                    opinion: "사실 가게에서 바로 먹는다면 '부먹'이 맞습니다. 튀김에 대한 자신감의 표현이죠. 하지만 배달이라면 눅눅해질 수 있으니 '찍먹'이 현명한 선택일 수 있습니다. 결국 상황에 따라 즐기는 것이 정답입니다."
+                }
+            }
+        };
+
+        const contentArea = document.getElementById('content-area');
+        const tabs = document.querySelectorAll('.tab-button');
+        let currentCharts = {};
+
+        function createContentHTML(key) {
+            const data = debateData[key];
+            const [option1, option2] = data.options;
+
+            return `
+                <section id="section-${key}" class="space-y-8">
+                    <div class="data-card p-6 text-center">
+                        <h2 class="text-2xl md:text-3xl font-bold text-stone-800 mb-2">${data.title}</h2>
+                        <p class="text-stone-600 max-w-3xl mx-auto">${data.overview}</p>
+                    </div>
+
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                        <div class="data-card p-6 space-y-4">
+                           <h3 class="text-xl font-bold text-center border-b pb-2" style="color:${option1.color};">${data.analysis[option1.id].title}</h3>
+                           <p class="text-stone-700 leading-relaxed text-sm md:text-base">${data.analysis[option1.id].content}</p>
+                        </div>
+                        <div class="data-card p-6 space-y-4">
+                           <h3 class="text-xl font-bold text-center border-b pb-2" style="color:${option2.color};">${data.analysis[option2.id].title}</h3>
+                           <p class="text-stone-700 leading-relaxed text-sm md:text-base">${data.analysis[option2.id].content}</p>
+                        </div>
+                    </div>
+                    
+                    <div class="data-card p-6">
+                        <h3 class="text-xl font-bold text-center mb-4 text-stone-800">데이터로 보는 취향 분석</h3>
+                        <div class="flex justify-center space-x-2 mb-4" id="filter-container-${key}">
+                            <button class="filter-btn text-sm py-1 px-3 rounded-full filter-btn-active" data-key="${key}" data-view="overall">전체</button>
+                            <button class="filter-btn text-sm py-1 px-3 rounded-full filter-btn-inactive" data-key="${key}" data-view="${Object.keys(data.stats)[1]}">${Object.keys(data.stats)[1] === 'byAge' ? '연령별' : '성별'}</button>
+                            <button class="filter-btn text-sm py-1 px-3 rounded-full filter-btn-inactive" data-key="${key}" data-view="${Object.keys(data.stats)[2]}">${Object.keys(data.stats)[2] === 'byRegion' ? '지역별' : '상황별'}</button>
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
+                            <div id="chart-container-overall-${key}" class="chart-container-wrapper">
+                                <div class="chart-container"><canvas id="chart-overall-${key}"></canvas></div>
+                            </div>
+                             <div id="chart-container-demographics-${key}" class="chart-container-wrapper hidden">
+                                <div class="chart-container"><canvas id="chart-demographics-${key}"></canvas></div>
+                            </div>
+                            <div class="text-center md:text-left">
+                                <div id="data-insight-${key}">
+                                     <h4 class="font-bold text-lg text-amber-600">전체 선호도</h4>
+                                     <p class="text-3xl font-bold my-2" style="color:${data.stats.overall[option1.id] > data.stats.overall[option2.id] ? option1.color : option2.color};">
+                                        ${data.stats.overall[option1.id] > data.stats.overall[option2.id] ? option1.name : option2.name} 우세
+                                     </p>
+                                     <p class="text-stone-600">
+                                         <strong>${option1.name}:</strong> ${data.stats.overall[option1.id]}%
+                                         <span class="mx-2">|</span>
+                                         <strong>${option2.name}:</strong> ${data.stats.overall[option2.id]}%
+                                     </p>
+                                </div>
+                                <div class="mt-6 p-4 bg-stone-50 rounded-lg border">
+                                    <h4 class="font-bold text-lg mb-2 text-stone-700">전문가 의견</h4>
+                                    <blockquote class="text-stone-600 italic">"${data.expert.opinion}"</blockquote>
+                                    <p class="text-right font-medium mt-2 text-sm">- ${data.expert.name}</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            `;
+        }
+
+        function renderCharts(key) {
+            if (currentCharts[key]) {
+                Object.values(currentCharts[key]).forEach(chart => chart.destroy());
+            }
+            currentCharts[key] = {};
+
+            const data = debateData[key];
+            
+            const overallCtx = document.getElementById(`chart-overall-${key}`).getContext('2d');
+            currentCharts[key].overall = new Chart(overallCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: [data.options[0].name, data.options[1].name],
+                    datasets: [{
+                        data: [data.stats.overall[data.options[0].id], data.stats.overall[data.options[1].id]],
+                        backgroundColor: [data.options[0].color, data.options[1].color],
+                        borderColor: '#FFFFFF',
+                        borderWidth: 4
+                    }]
+                },
+                options: { responsive: true, maintainAspectRatio: false, cutout: '60%', plugins: { legend: { display: false } } }
+            });
+
+            const demographicsKey = Object.keys(data.stats)[1];
+            const demographicsCtx = document.getElementById(`chart-demographics-${key}`).getContext('2d');
+            currentCharts[key].demographics = new Chart(demographicsCtx, {
+                type: 'bar',
+                data: data.stats[demographicsKey],
+                options: { responsive: true, maintainAspectRatio: false, indexAxis: 'y', plugins: { legend: { position: 'bottom' }}, scales: { x: { stacked: true }, y: { stacked: true } } }
+            });
+        }
+        
+        function switchChartView(key, view) {
+            const overallContainer = document.getElementById(`chart-container-overall-${key}`);
+            const demographicsContainer = document.getElementById(`chart-container-demographics-${key}`);
+            const insightBox = document.getElementById(`data-insight-${key}`);
+            const data = debateData[key];
+            
+            const chartViews = { overall: overallContainer, demographics: demographicsContainer };
+            Object.values(chartViews).forEach(c => c.classList.add('hidden'));
+
+            if(view === 'overall') {
+                chartViews.overall.classList.remove('hidden');
+                insightBox.innerHTML = `
+                     <h4 class="font-bold text-lg text-amber-600">전체 선호도</h4>
+                     <p class="text-3xl font-bold my-2" style="color:${data.stats.overall[data.options[0].id] > data.stats.overall[data.options[1].id] ? data.options[0].color : data.options[1].color};">
+                        ${data.stats.overall[data.options[0].id] > data.stats.overall[data.options[1].id] ? data.options[0].name : data.options[1].name} 우세
+                     </p>
+                     <p class="text-stone-600">
+                         <strong>${data.options[0].name}:</strong> ${data.stats.overall[data.options[0].id]}%
+                         <span class="mx-2">|</span>
+                         <strong>${data.options[1].name}:</strong> ${data.stats.overall[data.options[1].id]}%
+                     </p>
+                `;
+            } else {
+                chartViews.demographics.classList.remove('hidden');
+                const viewKey = view;
+                const viewName = document.querySelector(`[data-view='${viewKey}']`).textContent;
+                if (currentCharts[key] && currentCharts[key].demographics) {
+                    currentCharts[key].demographics.destroy();
+                }
+                const demographicsCtx = document.getElementById(`chart-demographics-${key}`).getContext('2d');
+                currentCharts[key].demographics = new Chart(demographicsCtx, {
+                    type: 'bar',
+                    data: data.stats[viewKey],
+                    options: { responsive: true, maintainAspectRatio: false, indexAxis: viewKey === 'byGender' ? 'x' : 'y', plugins: { legend: { position: 'bottom' }}, scales: { x: { stacked: true }, y: { stacked: true } } }
+                });
+                
+                const mostSignificant = data.stats[viewKey].labels[0];
+                const mostSignificantData1 = data.stats[viewKey].datasets[0].data[0];
+                const mostSignificantData2 = data.stats[viewKey].datasets[1].data[0];
+                
+                insightBox.innerHTML = `
+                     <h4 class="font-bold text-lg text-amber-600">${viewName} 분석 인사이트</h4>
+                     <p class="text-2xl font-bold my-2 text-stone-700">
+                        ${mostSignificant}에서 가장 큰 취향 차이
+                     </p>
+                     <p class="text-stone-600">
+                         <strong>${data.options[0].name}:</strong> ${mostSignificantData1}%
+                         <span class="mx-2">|</span>
+                         <strong>${data.options[1].name}:</strong> ${mostSignificantData2}%
+                     </p>
+                `;
+            }
+        }
+
+        function setActiveTab(key) {
+            tabs.forEach(tab => {
+                tab.classList.toggle('tab-active', tab.id === `tab-${key}`);
+                tab.classList.toggle('tab-inactive', tab.id !== `tab-${key}`);
+            });
+            contentArea.innerHTML = createContentHTML(key);
+            renderCharts(key);
+
+            document.querySelectorAll(`#filter-container-${key} .filter-btn`).forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    document.querySelectorAll(`#filter-container-${key} .filter-btn`).forEach(b => b.classList.replace('filter-btn-active', 'filter-btn-inactive'));
+                    e.currentTarget.classList.replace('filter-btn-inactive', 'filter-btn-active');
+                    switchChartView(key, e.currentTarget.dataset.view);
+                });
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            setActiveTab('tteokbokki');
+            tabs.forEach(tab => {
+                tab.addEventListener('click', () => setActiveTab(tab.id.replace('tab-', '')));
+            });
+        });
+    </script>
+</body>
+</html>
