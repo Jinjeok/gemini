@@ -1,35 +1,61 @@
 const fs = require('fs');
 const path = require('path');
+const { execSync } = require('child_process');
 
 const docsDir = path.join(__dirname, 'docs');
 const outputFilePath = path.join(__dirname, 'index.html');
 
-// docs 폴더에서 .html 파일 목록을 읽어옵니다.
 const reportFiles = fs.readdirSync(docsDir).filter(file => file.endsWith('.html'));
 
-// 파일 이름으로 역순 정렬 (최신 파일이 위로)
-reportFiles.sort().reverse();
-
-let cardsHTML = '';
+let reports = [];
 
 reportFiles.forEach(filename => {
     const filePath = path.join(docsDir, filename);
     const fileContent = fs.readFileSync(filePath, 'utf-8');
     
-    // 각 HTML 파일에서 <title> 태그 내용을 추출합니다.
+    // 1. <title> 태그 내용 추출
     const titleMatch = fileContent.match(/<title>(.*?)<\/title>/);
     const title = titleMatch ? titleMatch[1] : filename;
 
-    cardsHTML += `
-            <div class="report-card">
-                <a href="docs/${filename}">
-                    <h2 class="report-title">${title}</h2>
-                    <p class="report-filename">${filename}</p>
-                </a>
-            </div>`;
+    // 2. 각 파일의 마지막 git commit 날짜 추출
+    // Github Action 환경에서는 전체 git 히스토리를 가져와야 정확합니다.
+    // actions/checkout@v4는 기본적으로 shallow clone이므로, fetch-depth: 0 옵션이 필요할 수 있습니다.
+    try {
+        const command = `git log -1 --format=%cI -- "${filePath}"`;
+        const lastModified = execSync(command).toString().trim();
+        reports.push({
+            filename,
+            title,
+            // ISO 8601 날짜를 'YYYY-MM-DD HH:MM' 형식으로 변경
+            date: new Date(lastModified).toLocaleString('ko-KR', { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', hour12: false }).replace(/\. /g, '-').replace('.', '').slice(0, -1)
+        });
+    } catch (e) {
+        // git log 실패 시 파일 시스템의 수정 날짜를 사용 (fallback)
+        const stats = fs.statSync(filePath);
+        reports.push({
+            filename,
+            title,
+            date: stats.mtime.toLocaleString('ko-KR')
+        });
+        console.warn(`Could not get git log for ${filename}. Falling back to file modification time.`);
+    }
 });
 
-// 최종 index.html 템플릿
+// 3. 최신순으로 정렬
+reports.sort((a, b) => new Date(b.date) - new Date(a.date));
+
+// 4. HTML 카드 생성
+let cardsHTML = reports.map(report => `
+            <div class="report-card">
+                <a href="docs/${report.filename}">
+                    <div class="flex justify-between items-center">
+                        <h2 class="report-title">${report.title}</h2>
+                        <span class="report-date">${report.date}</span>
+                    </div>
+                    <p class="report-filename">${report.filename}</p>
+                </a>
+            </div>`).join('');
+
 const finalHTML = `
 <!DOCTYPE html>
 <html lang="ko">
@@ -38,8 +64,6 @@ const finalHTML = `
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gemini Deep Research Curation</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet">
     <style>
         body { font-family: 'Noto Sans KR', sans-serif; background-color: #F8F9FA; }
@@ -48,13 +72,14 @@ const finalHTML = `
         .report-card a { text-decoration: none; color: inherit; display: block; padding: 24px; }
         .report-title { color: #212529; font-weight: 700; font-size: 1.25rem; }
         .report-filename { color: #868E96; font-size: 0.875rem; margin-top: 8px; }
+        .report-date { color: #868E96; font-size: 0.875rem; white-space: nowrap; margin-left: 16px; }
     </style>
 </head>
 <body class="antialiased text-gray-800">
     <div class="container mx-auto p-4 md:p-8 max-w-4xl">
         <header class="text-center mb-10">
             <h1 class="text-4xl md:text-5xl font-bold text-gray-800">Gemini Deep Research</h1>
-            <p class="text-lg mt-2 text-gray-600">Gemini를 통해 생성된 리서치 보고서 모음</p>
+            <p class="text-lg mt-2 text-gray-600">Gemini를 통해 생성된 리서치 보고서 모음 (최신순)</p>
         </header>
         <main id="curation-list" class="space-y-6">
             ${cardsHTML}
@@ -64,7 +89,6 @@ const finalHTML = `
 </html>
 `;
 
-// 생성된 내용을 index.html 파일로 씁니다.
 fs.writeFileSync(outputFilePath, finalHTML);
 
-console.log('index.html 파일이 성공적으로 생성되었습니다!');
+console.log('index.html이 commit 시각 기준으로 성공적으로 업데이트되었습니다!');
