@@ -12,18 +12,19 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  # --------------------
-  # 1. 빌드 및 커밋(Build & Commit) 잡
-  # --------------------
   build:
     runs-on: ubuntu-latest
     permissions:
-      contents: write # 레포지토리에 커밋하고 푸시하기 위한 권한
+      contents: write
       pages: write
       id-token: write
     steps:
+      # --- 👇 여기가 핵심 수정 포인트입니다 ---
+      # fetch-depth: 0를 추가하여 전체 Git 기록을 가져옵니다.
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # 전체 히스토리를 클론하여 각 파일의 정확한 로그 시간을 가져올 수 있도록 합니다.
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -33,13 +34,11 @@ jobs:
       - name: Generate index.html
         run: node generate-index.js
 
-      # --- 👇 여기가 핵심적인 수정 부분입니다 ---
-      # 수동 git 명령어를 안정적인 자동 커밋 Action으로 교체합니다.
       - name: Commit updated index.html
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
           commit_message: "Automated: Update index.html"
-          file_pattern: index.html # index.html 파일만 커밋 대상으로 지정
+          file_pattern: index.html
 
       - name: Setup Pages
         uses: actions/configure-pages@v5
@@ -49,9 +48,6 @@ jobs:
         with:
           path: '.'
 
-  # --------------------
-  # 2. 배포(Deploy) 잡 (수정 없음)
-  # --------------------
   deploy:
     needs: build
     permissions:
